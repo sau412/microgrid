@@ -367,10 +367,23 @@ function html_transactions($user_uid,$token) {
 
 // Start computations block
 function html_compute_block($user_uid,$token) {
+        global $currency_short;
+
         $result="";
+
+        $projects_array=db_query_to_array("SELECT `uid`,`name`,`version` FROM `projects` WHERE `is_enabled`=1");
+        $project_selector="";
+        foreach($projects_array as $project_data) {
+                $project_uid=$project_data['uid'];
+                $project_name=$project_data['name'];
+                $project_version=$project_data['version'];
+                $project_selector.="<option value='$project_uid'>$project_name ver $project_version</option>\n";
+        }
+
         $result.=<<<_END
+<h2>Compute for $currency_short</h2>
 <form name=load_comp_block>
-<p>Select project: <select id=project name=project><option value=1>Prime pairs</option></select></p>
+<p>Select project: <select id=project name=project>$project_selector</select></p>
 <p>Threads: <input type=number id=threads name=threads value='1'></p>
 <p><input type=button value='Start' id=start_button onClick='start_calculations()'></p>
 </form>
@@ -435,7 +448,7 @@ function start_calculations() {
 function repeatable_worker(project_id, worker_id) {
 //      $.post("./",[action:"get_new_task",token:"$token"],function (result) {
 
-        var myWorker = new Worker('worker.js');
+        var myWorker = new Worker('?project_script=' + project_id);
         myWorker.addEventListener('message', function(e) {
                 // e.data[0] is worker id
                 // e.data[1] is message type: 0 progress, 1 result
@@ -456,25 +469,31 @@ function repeatable_worker(project_id, worker_id) {
                         data = {
                                 action:'task_store_result',
                                 token:'$token',
-                                varsion:workunit_version,
+                                version:workunit_version,
                                 workunit_result_uid:workunit_result_uid,
                                 result:workunit_result
                         };
-                        $.post("./",data,function () {
-                                // Run next worker
-                                document.getElementById("status_"+e.data[0]).innerHTML='downloading';
-                                var data = {
-                                        action:"get_new_task",
-                                        project:project_id,
-                                        token:"$token"
-                                };
-                                $.post("./",data,function (result) {
-                                        task_data=JSON.parse(result);
-                                        var start_number=task_data.start_number;
-                                        var stop_number=task_data.stop_number;
-                                        var workunit_result_uid=task_data.workunit_result_uid;
-                                        myWorker.postMessage([worker_id,workunit_result_uid,start_number,stop_number]);
-                                });
+                        $.post("./",data,function (reply) {
+                                reply_json=JSON.parse(reply);
+                                if(reply_json.result=="ok") {
+                                        // Run next worker
+                                        document.getElementById("status_"+e.data[0]).innerHTML='downloading';
+                                        var data = {
+                                                action:"get_new_task",
+                                                project:project_id,
+                                                token:"$token"
+                                        };
+                                        $.post("./",data,function (result) {
+                                                task_data=JSON.parse(result);
+                                                var start_number=task_data.start_number;
+                                                var stop_number=task_data.stop_number;
+                                                var workunit_result_uid=task_data.workunit_result_uid;
+                                                document.getElementById("status_"+e.data[0]).innerHTML='working';
+                                                myWorker.postMessage([worker_id,workunit_result_uid,start_number,stop_number]);
+                                        });
+                                } else {
+                                        document.getElementById("status_"+e.data[0]).innerHTML=reply_json.message;
+                                }
                         });
                 }
         }, false);
@@ -486,6 +505,7 @@ function repeatable_worker(project_id, worker_id) {
                 token:"$token"
         };
         $.post("./",data,function (result) {
+                document.getElementById("status_"+worker_id).innerHTML='working';
                 task_data=JSON.parse(result);
                 var start_number=task_data.start_number;
                 var stop_number=task_data.stop_number;
@@ -500,4 +520,41 @@ _END;
         return $result;
 }
 
+function html_payouts($user_uid,$token) {
+        global $currency_short;
+
+        $result='';
+
+        $user_uid_escaped=db_escape($user_uid);
+        $payouts_data=db_query_to_array("SELECT `address`,`amount`,`tx_id`,`timestamp` FROM `payouts` WHERE `user_uid`='$user_uid_escaped' ORDER BY `timestamp` DESC LIMIT 100");
+
+        $result.=<<<_END
+<h2>Payouts</h2>
+<p>
+<table class='table_horizontal'>
+<tr><th>Address</th><th>Amount, $currency_short</th><th>TX ID</th><th>Timestamp</th></tr>
+
+_END;
+
+        foreach($payouts_data as $payout_info) {
+                $address=$payout_info['address'];
+                $amount=$payout_info['amount'];
+                $tx_id=$payout_info['tx_id'];
+                $timestamp=$payout_info['timestamp'];
+
+                $address_html=html_address_url($address);
+                $amount_html=html_escape($amount);
+                $tx_id_html=html_tx_url($tx_id);
+                $timestamp_html=html_escape($timestamp);
+
+                $result.="<tr><td>$address_html</td><td>$amount_html</td><td>$tx_id_html</td><td>$timestamp_html</td></tr>\n";
+        }
+
+        $result.=<<<_END
+</table>
+</p>
+
+_END;
+        return $result;
+}
 ?>
