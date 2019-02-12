@@ -11,7 +11,7 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 
         $exists_uid=db_query_to_variable("SELECT `uid` FROM `workunits`
 WHERE `project_uid`='$project_uid_escaped' AND `is_completed`=0
-AND `uid` NOT IN (SELECT `workunit_uid` FROM `workunit_results` WHERE `user_uid`='$user_uid_escaped') AND `in_progress`<'$project_retries'");
+AND `uid` NOT IN (SELECT `workunit_uid` FROM `workunit_results` WHERE `user_uid`='$user_uid_escaped') AND `in_progress`=0");
 
         if($exists_uid) {
                 $workunit_uid=$exists_uid;
@@ -52,48 +52,70 @@ WHERE wr.`uid`='$workunit_result_uid_escaped'");
         return $result;
 }
 
-function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$result) {
+function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$version,$result) {
         $user_uid_escaped=db_escape($user_uid);
         $workunit_result_uid_escaped=db_escape($workunit_results_uid);
         $result_hash=hash("sha256",$result);
         $result_escaped=db_escape($result);
         $result_hash_escaped=db_escape($result_hash);
 
-        db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`projects` READ");
+        $workunit_uid=db_query_to_variable("SELECT `workunit_uid` FROM `workunit_results` WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
+        $workunit_uid_escaped=db_escape($workunit_uid);
+        $project_uid=db_query_to_variable("SELECT `project_uid` FROM `workunits` WHERE `uid`='$workunit_uid_escaped' AND `is_completed`=0");
+        $project_uid_escaped=db_escape($project_uid);
+        $actual_version=microgrid_get_actual_version($project_uid);
+        if($version<$actual_version) {
+                return array("result"=>"fail","message"=>"Incorrect module version, refresh page and start again");
+        }
+
+        db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`users` WRITE,`projects` READ");
 
         // Update workunit_result for specific user
-        db_query("UPDATE `workunit_results` SET `result`='$result_escaped',`result_hash`='$result_hash_escaped',`completed`=NOW() WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
+        db_query("UPDATE `workunit_results` SET `result_hash`='$result_hash_escaped',`completed`=NOW() WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
 
         // Check is results matches, mark workunits as completed
-        $workunit_uid=db_query_to_variable("SELECT `workunit_uid` FROM `workunit_results` WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
         if($workunit_uid!==NULL) {
                 // Decrease units in work
-                $workunit_uid_escaped=db_escape($workunit_uid);
                 db_query("UPDATE `workunits` SET `in_progress`=`in_progress`-1 WHERE `uid`='$workunit_uid_escaped'");
 
                 // Get project uid
-                $project_uid=db_query_to_variable("SELECT `project_uid` FROM `workunits` WHERE `uid`='$workunit_uid_escaped'");
                 if($project_uid!==NULL) {
                         // Check similar results
                         $count=db_query_to_variable("SELECT count(*) FROM `workunit_results` WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
 
                         // If max amount reached, mark workunit as completed
-                        $project_uid_escaped=db_escape($project_uid);
                         $required_amount=db_query_to_variable("SELECT `retries` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 
                         if($count>=$required_amount) {
-                                db_query("UPDATE `workunits` SET `in_progress`=0,`is_completed`=1 WHERE `uid`='$workunit_uid_escaped'");
-                                db_query("UPDATE `workunit_results` SET `is_valid`=1 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
-                                db_query("UPDATE `workunit_results` SET `is_valid`=0 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`<>'$result_hash'");
+                                $reward_amount=db_query_to_variable("SELECT `workunit_price` FROM `projects` WHERE `uid`='$project_uid_escaped'");
+                                if($reward_amount==0) $reward_amount=0;
+                                $reward_amount_escaped=db_escape($reward_amount);
+                                db_query("UPDATE `workunits` SET `in_progress`=0,`is_completed`=1,`result`='$result_escaped' WHERE `uid`='$workunit_uid_escaped'");
+                                db_query("UPDATE `users` SET `balance`=`balance`+'$reward_amount_escaped' WHERE `uid` IN (SELECT `user_uid` FROM `workunit_results` WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash')");
+                                db_query("UPDATE `workunit_results` SET `is_valid`=1,`reward`='$reward_amount_escaped' WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
+                                db_query("UPDATE `workunit_results` SET `is_valid`=0,`reward`=0 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`<>'$result_hash'");
                         }
                 }
         }
 
         db_query("UNLOCK TABLES");
+        return array("result"=>"ok");
 }
 
 function microgrid_check_timeouts() {
         // Mark timed out workunits as invalid
+}
+
+function microgrid_get_actual_version($project_uid) {
+        $project_uid_escaped=db_escape($project_uid);
+
+        return db_query_to_variable("SELECT `version` FROM `projects` WHERE `uid`='$project_uid_escaped'");
+}
+
+function microgrid_get_function($project_uid) {
+        $project_uid_escaped=db_escape($project_uid);
+
+        return db_query_to_variable("SELECT `function` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 }
 
 ?>
