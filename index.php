@@ -60,7 +60,7 @@ if(isset($action)) {
                 captcha_regenerate($session);
         } else if($action=='logout') {
                 user_logout($session);
-                $message="logout_successfull";
+                $message="logout_successful";
         } else if($action=='get_new_task') {
                 $project_uid=stripslashes($_POST['project']);
                 $workunit_result_uid=microgrid_generate_workunit_task($project_uid,$user_uid);
