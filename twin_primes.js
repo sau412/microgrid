@@ -18,12 +18,15 @@ self.addEventListener('message', function(e) {
 
                 for(number=start_number; number<=stop_number; number+=2) {
                         // Check number
-                        result = check_number(number);
-                        if(result !== null) {
-                                // Add number to results
-                                seq_result.push(number);
-                                // Optimization - next 4 numbers can be skipped
-                                number+=4;
+                        if(check_is_prime(number)) {
+                          if(check_is_prime(number+2)) {
+                            // Add number to results
+                            seq_result.push(number);
+                          }
+                          else {
+                            // Optimization - number+2 is false so we can skip it
+                            number+=2;
+                          }
                         }
                         // Report progress
                         if(number > progress_report) {
@@ -41,15 +44,6 @@ self.addEventListener('message', function(e) {
         self.postMessage([thread_index, 1, version, workunit_result_uid, result]);
 }, false);
 
-// Number checking function
-// Returns null if not twin
-// Returns first of twins otherwise
-function check_number(number) {
-        if((number%2)==0) return null;
-        if(check_is_prime(number) && check_is_prime(number+2)) return [number,number+2];
-        return null;
-}
-
 // Check is number prime or not
 function check_is_prime(number) {
         number=parseInt(number);
@@ -60,4 +54,3 @@ function check_is_prime(number) {
         }
         return 1;
 }
-
