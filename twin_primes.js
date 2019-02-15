@@ -1,3 +1,5 @@
+importScripts("prime_list.js")
+
 self.addEventListener('message', function(e) {
         var thread_index = e.data[0];
         var workunit_result_uid = e.data[1];
@@ -16,7 +18,7 @@ self.addEventListener('message', function(e) {
 
                 if((start_number % 2) == 0) start_number++;
 
-                for(number=start_number; number<=stop_number; number+=2) {
+                for(number=start_number; number<=stop_number; number+=4) {
                         // Check number
                         if(check_is_prime(number)) {
                           if(check_is_prime(number+2)) {
@@ -26,6 +28,10 @@ self.addEventListener('message', function(e) {
                           else {
                             // Optimization - number+2 is false so we can skip it
                             number+=2;
+                          }
+                          if(check_is_prime(number-2)) {
+                            // Add number to results
+                            seq_result.push(number-2);
                           }
                         }
                         // Report progress
@@ -47,9 +53,16 @@ self.addEventListener('message', function(e) {
 // Check is number prime or not
 function check_is_prime(number) {
         number=parseInt(number);
-        var i;
+        var i, list_bound;
         var limit=Math.floor(Math.sqrt(number));
-        for(i=2;i<=limit;i++) {
+
+        // Based off of isprime implementation here: https://github.com/ExclusiveOrange/IsPrime/blob/master/isprime.hpp
+        for(list_bound=PRIME_LIST.length; list_bound >= 0 && PRIME_LIST[list_bound-1] > limit; list_bound--);
+        for(i=0; i < list_bound; i++) {
+                if((number%PRIME_LIST[i]) == 0) return 0;
+        }
+
+        for(i=PRIME_LIST[PRIME_LIST.length-1]+2;i<=limit;i+=2) {
                 if((number%i) == 0) return 0;
         }
         return 1;
