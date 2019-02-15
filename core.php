@@ -111,14 +111,14 @@ VALUES ('$mail_escaped','$login_escaped','$password_hash','$salt_escaped',NOW(),
                         $user_uid=db_query_to_variable("SELECT `uid` FROM `users` WHERE `login`='$login_escaped'");
                         $user_uid_escaped=db_escape($user_uid);
                         db_query("UPDATE `sessions` SET `user_uid`='$user_uid_escaped' WHERE `session`='$session_escaped'");
-                        return "register_successfull";
+                        return "register_successful";
                         return TRUE;
                 } else if($password_hash==$exists_hash) {
                         write_log("Logged in '$login'");
                         $user_uid=db_query_to_variable("SELECT `uid` FROM `users` WHERE `login`='$login_escaped'");
                         $user_uid_escaped=db_escape($user_uid);
                         db_query("UPDATE `sessions` SET `user_uid`='$user_uid_escaped' WHERE `session`='$session_escaped'");
-                        return "login_successfull";
+                        return "login_successful";
                 } else {
                         write_log("Invalid password for '$login'");
                         return "register_failed_invalid_password";
@@ -153,7 +153,7 @@ function user_login($session,$login,$password) {
                         //notify_user($user_uid,"Logged in $login","IP: ".$_SERVER['REMOTE_ADDR']);
                         db_query("UPDATE `sessions` SET `user_uid`='$user_uid' WHERE `session`='$session_escaped'");
                         db_query("UPDATE `users` SET `login_time`=NOW() WHERE `uid`='$user_uid_escaped'");
-                        return "login_successfull";
+                        return "login_successful";
                 } else {
                         write_log("Invalid password for '$login'");
                         //notify_user($user_uid,"Log in failed","IP: ".$_SERVER['REMOTE_ADDR']);
@@ -204,7 +204,7 @@ function user_change_settings($user_uid,$mail,$withdraw_address,$password,$new_p
                 }
 
                 //notify_user($user_uid,"Settings changed",$change_log);
-                return "user_change_settings_successfull";
+                return "user_change_settings_successful";
         } else {
                 //notify_user($user_uid,"Change settings fail","Change settings failed, password incorrect");
                 return "user_change_settings_failed_password_incorrect";
@@ -227,7 +227,7 @@ function admin_change_settings($login_enabled,$payouts_enabled,$info,$global_mes
         // Global message
         set_variable("global_message",$global_message);
 
-        return "admin_change_settings_successfull";
+        return "admin_change_settings_successful";
 }
 
 // Get username by uid
@@ -246,7 +246,7 @@ function user_logout($session) {
 
         $session_escaped=db_escape($session);
         db_query("UPDATE `sessions` SET `user_uid`=NULL WHERE `session`='$session_escaped'");
-        return "logout_successfull";
+        return "logout_successful";
 }
 
 // Get user balance
