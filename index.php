@@ -23,7 +23,7 @@ if(isset($_GET['captcha'])) {
 if(isset($_GET['project_script'])) {
         $project_uid=stripslashes($_GET['project_script']);
         header("Content-type: application/javascript");
-        echo microgrid_get_function($project_uid);
+        echo file_get_contents(microgrid_get_function($project_uid));
         die();
 }
 
