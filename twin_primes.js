@@ -24,6 +24,7 @@ self.addEventListener('message', function(e) {
                           if(check_is_prime(number+2)) {
                             // Add number to results
                             seq_result.push(number);
+                            number+=4;
                           }
                           else {
                             // Optimization - number+2 is false so we can skip it
@@ -32,6 +33,7 @@ self.addEventListener('message', function(e) {
                           if(check_is_prime(number-2)) {
                             // Add number to results
                             seq_result.push(number-2);
+                            number+=2;
                           }
                         }
                         // Report progress
