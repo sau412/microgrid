@@ -1,3 +1,5 @@
+importScripts("prime_list.js")
+
 self.addEventListener('message', function(e) {
         var thread_index = e.data[0];
         var workunit_result_uid = e.data[1];
@@ -7,27 +9,29 @@ self.addEventListener('message', function(e) {
 
         // Check each number and report progress
         function check_number_seq(thread_index, start_number, stop_number) {
-                var number;
+                var number, n, nMod;
                 var seq_result = [];
                 var is_prime;
                 var progress = 0;
-                progress_report_interval=Math.floor((stop_number-start_number)/100);
+                var start_n = Math.ceil(start_number / 6);
+                var number_dif = stop_number-start_number;
+                progress_report_interval=Math.floor(number_dif/100);
                 progress_report=start_number;
 
-                if((start_number % 2) == 0) start_number++;
+                // All twin primes except (3,5) are of the form (6n-1,6n+1), so we
+                // iterate over n, with number = 6n and checking number-1 and number+1
+                for(n=start_n,number=start_n*6; number<=stop_number; n++,number+=6) {
+                        // All n such that 6n-1 and 6n+1 are prime must have the units digit 0, 2, 3, 5, 7, or 8
+                        nMod = n % 5;
+                        if(nMod == 1 || nMod == 4) continue;
 
-                for(number=start_number; number<=stop_number; number+=2) {
-                        // Check number
-                        result = check_number(number);
-                        if(result !== null) {
-                                // Add number to results
-                                seq_result.push(number);
-                                // Optimization - next 4 numbers can be skipped
-                                number+=4;
+                        // Check (6n-1,6n+1)
+                        if(check_is_prime(number-1) && check_is_prime(number+1)) {
+                            seq_result.push(number-1);
                         }
                         // Report progress
                         if(number > progress_report) {
-                                progress=(number-start_number)/(stop_number-start_number);
+                                progress=(number-start_number)/number_dif;
                                 self.postMessage([thread_index,0,progress]);
                                 progress_report+=progress_report_interval;
                         }
@@ -41,23 +45,20 @@ self.addEventListener('message', function(e) {
         self.postMessage([thread_index, 1, version, workunit_result_uid, result]);
 }, false);
 
-// Number checking function
-// Returns null if not twin
-// Returns first of twins otherwise
-function check_number(number) {
-        if((number%2)==0) return null;
-        if(check_is_prime(number) && check_is_prime(number+2)) return [number,number+2];
-        return null;
-}
-
 // Check is number prime or not
 function check_is_prime(number) {
         number=parseInt(number);
-        var i;
+        var i, list_bound;
         var limit=Math.floor(Math.sqrt(number));
-        for(i=2;i<=limit;i++) {
+
+        // Based off of isprime implementation here: https://github.com/ExclusiveOrange/IsPrime/blob/master/isprime.hpp
+        for(list_bound=PRIME_LIST.length; list_bound >= 0 && PRIME_LIST[list_bound-1] > limit; list_bound--);
+        for(i=0; i < list_bound; i++) {
+                if((number%PRIME_LIST[i]) == 0) return 0;
+        }
+
+        for(i=PRIME_LIST[PRIME_LIST.length-1]+2;i<=limit;i+=2) {
                 if((number%i) == 0) return 0;
         }
         return 1;
 }
-
