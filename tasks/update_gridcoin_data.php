@@ -76,6 +76,7 @@ foreach($payout_data_array as $payout_data) {
 	}
 }
 
+// Update balance after all
 $current_balance=grc_web_get_balance();
 set_variable("wallet_balance",$current_balance);
 
