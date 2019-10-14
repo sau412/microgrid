@@ -146,10 +146,11 @@ if(isset($_COOKIE['message'])) {
 }
 echo html_page_begin($project_name,$token);
 echo html_message_global();
-//var_dump(microgrid_generate_workunit_task(1,2));
+
 if($user_uid) {
 	echo html_logout_form($user_uid,$token);
 }
+
 if($message) {
 	$lang_message=lang_message($message);
 	if($lang_message!='') {
