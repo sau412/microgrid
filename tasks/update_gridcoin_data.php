@@ -3,16 +3,17 @@
 if(!isset($argc)) die();
 
 // Gridcoinresearch send rewards
-require_once("settings.php");
-require_once("db.php");
-require_once("core.php");
-require_once("gridcoin_web_wallet.php");
+require_once("../lib/settings.php");
+require_once("../lib/db.php");
+require_once("../lib/core.php");
+require_once("../lib/gridcoin_web_wallet.php");
 
 // Check if unsent rewards exists
 db_connect();
 
 // Get balance
 $current_balance=grc_web_get_balance();
+set_variable("wallet_balance",$current_balance);
 echo "Current balance: $current_balance\n";
 
 // Get payout information for GRC
@@ -74,5 +75,8 @@ foreach($payout_data_array as $payout_data) {
 		break;
 	}
 }
+
+$current_balance=grc_web_get_balance();
+set_variable("wallet_balance",$current_balance);
 
 ?>

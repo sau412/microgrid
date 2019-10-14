@@ -1,52 +1,52 @@
 html {
-        font-family: sans-serif;
+	font-family: sans-serif;
 }
 
 /* Popup QR from https://www.w3schools.com/css/css_tooltip.asp */
 
 .url_with_qr_container {
-        position: relative;
-        display: inline-block;
-        border-bottom: 1px dotted black;
+	position: relative;
+	display: inline-block;
+	border-bottom: 1px dotted black;
 }
 
 /* Tooltip text */
 .url_with_qr_container .qr {
-        visibility: hidden;
-        border: 1px solid #888;
-        background-color: white;
-        text-align: center;
-        left: 50%;
-        padding: 1em;
-        border-radius: 6px;
-
-        position: absolute;
-        z-index: 1;
+	visibility: hidden;
+	border: 1px solid #888;
+	background-color: white;
+	text-align: center;
+	left: 50%;
+	padding: 1em;
+	border-radius: 6px;
+ 
+	position: absolute;
+	z-index: 1;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
 .url_with_qr_container:hover .qr {
-        visibility: visible;
+	visibility: visible;
 }
 
 /* Ordinary table */
 .table_horizontal {
-        border-collapse: collapse;
+	border-collapse: collapse;
 }
 
 .table_horizontal td, .table_horizontal th{
-        border: 1px solid #888;
-        padding: 0.1em 1em;
+	border: 1px solid #888;
+	padding: 0.1em 1em;
 }
 
 /* Ordinary table */
 .table_borderless {
-        border-collapse: collapse;
+	border-collapse: collapse;
 }
 
 .table_borderless td {
-        border: 0;
-        padding: 0.1em 1em;
+	border: 0;
+	padding: 0.1em 1em;
 }
 
 /* Horizontal menu, thanks to https://www.w3schools.com/html/tryit.asp?filename=tryhtml_lists_menu */
@@ -64,7 +64,7 @@ html {
 
 .horizontal_menu li a{
         display: block;
-        color: black;
+	color: black;
         text-align: center;
         padding: 1em;
         text-decoration: none;
@@ -76,34 +76,34 @@ html {
 
 /* Message */
 .message {
-        border: 1px solid #888;
-        background-color: #FF8;
-        display: block;
+	border: 1px solid #888;
+	background-color: #FF8;
+	display: block;
 }
 
 .message_global {
-        border: 1px solid #888;
-        background-color: #FF8;
-        display: block;
+	border: 1px solid #888;
+	background-color: #FF8;
+	display: block;
 }
 
 /* Enabled and disabled colors */
 .enabled {
-        color: green;
-        font-weight: bold;
+	color: green;
+	font-weight: bold;
 }
 
 .disabled {
-        color: red;
-        font-weight: bold;
+	color: red;
+	font-weight: bold;
 }
 
 /* Calc progress table */
 .comp_progress_block_table {
-        border-collapse:collapse;
+	border-collapse:collapse;
 }
 
 .comp_progress_block_td {
-        border: solid 1px lightgray;
-        padding: 0.1em 1em;
+	border: solid 1px lightgray;
+	padding: 0.1em 1em;
 }

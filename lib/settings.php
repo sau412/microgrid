@@ -15,8 +15,10 @@ $db_base="";
 $salt="";
 
 // Site settings
+$settings_api_enabled=TRUE;
 $settings_payouts_enabled=TRUE;
 $settings_login_enabled=TRUE;
+$default_language="en";
 
 // Gridcoin URLs
 $address_url="https://www.gridcoinstats.eu/address/";
@@ -27,4 +29,6 @@ $block_url="https://www.gridcoinstats.eu/block/";
 $grc_api_url="https://wallet.arikado.ru/api.php";
 $grc_api_key="";
 
+// Workunits settings
+$workunit_max_interval="1 DAY";
 ?>
