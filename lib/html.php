@@ -107,6 +107,7 @@ function html_tabs($user_uid) {
 	if($user_uid) {
 		$result.=html_menu_element("info","Info");
 		$result.=html_menu_element("comp","Compute for $currency_short");
+		$result.=html_menu_element("rating","Rating");
 		$result.=html_menu_element("payouts","Payouts");
 		$result.=html_menu_element("settings","Settings");
 		if(is_admin($user_uid)) {
@@ -562,4 +563,44 @@ _END;
 _END;
 	return $result;
 }
+
+function html_rating_block($user_uid,$token) {
+	global $currency_short;
+
+	$result="";
+
+	$user_uid_escaped=db_escape($user_uid);
+	$rating_data=db_query_to_array("SELECT `users`.`login`,count(*) AS 'count',SUM(`reward`) AS 'reward'
+		FROM `workunit_results`
+		JOIN `users` ON `users`.`uid`=`workunit_results`.`user_uid`
+		WHERE `workunit_results`.`is_valid`=1
+		GROUP BY `users`.`login` ORDER BY count(*) DESC LIMIT 100");
+
+	$result.=<<<_END
+<h2>Rating</h2>
+<p>
+<table class='table_horizontal'>
+<tr><th>User</th><th>Workunits</th><th>$currency_short earned</th></tr>
+
+_END;
+
+	foreach($rating_data as $rating_row) {
+		$login=$rating_row['login'];
+		$count=$rating_row['count'];
+		$reward=$rating_row['reward'];
+
+		$login_html=html_escape($login);
+
+		$result.="<tr><td>$login_html</td><td>$count</td><td>$reward</td></tr>\n";
+	}
+
+	$result.=<<<_END
+</table>
+</p>
+
+_END;
+
+	return $result;
+}
+
 ?>
