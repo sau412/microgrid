@@ -590,6 +590,8 @@ _END;
 		$reward=$rating_row['reward'];
 
 		$login_html=html_escape($login);
+		$reward=floor($reward);
+		if($reward<1) $reward="<1";
 
 		$result.="<tr><td>$login_html</td><td>$count</td><td>$reward</td></tr>\n";
 	}
