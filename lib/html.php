@@ -118,6 +118,7 @@ function html_tabs($user_uid) {
 		$result.=html_menu_element("info","Info");
 		$result.=html_menu_element("login","Login");
 		$result.=html_menu_element("register","Register");
+		$result.=html_menu_element("rating","Rating");
 	}
 	$result.="</ul>\n";
 	$result.="</div>\n";

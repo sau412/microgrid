@@ -136,6 +136,9 @@ if(isset($_GET['ajax']) && isset($_GET['block'])) {
 			case 'register':
 				echo html_register_form($token);
 				break;
+			case 'rating':
+				echo html_rating_block($user_uid,$token);
+				break;
 		}
 	}
 	die();
