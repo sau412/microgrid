@@ -571,12 +571,13 @@ function html_rating_block($user_uid,$token) {
 	$result="";
 
 	$user_uid_escaped=db_escape($user_uid);
-	$rating_data=db_query_to_array("SELECT `users`.`login`,count(*) AS 'count',SUM(`reward`) AS 'reward'
+	$rating_data=json_decode(get_variable("rating_cache"));
+	/*$rating_data=db_query_to_array("SELECT `users`.`login`,count(*) AS 'count',SUM(`reward`) AS 'reward'
 		FROM `workunit_results`
 		JOIN `users` ON `users`.`uid`=`workunit_results`.`user_uid`
 		WHERE `workunit_results`.`is_valid`=1
 		GROUP BY `users`.`login` ORDER BY count(*) DESC LIMIT 100");
-
+*/
 	$result.=<<<_END
 <h2>Rating</h2>
 <p>
