@@ -571,7 +571,7 @@ function html_rating_block($user_uid,$token) {
 	$result="";
 
 	$user_uid_escaped=db_escape($user_uid);
-	$rating_data=json_decode(get_variable("rating_cache"));
+	$rating_data=json_decode(get_variable("rating_cache"),TRUE);
 	/*$rating_data=db_query_to_array("SELECT `users`.`login`,count(*) AS 'count',SUM(`reward`) AS 'reward'
 		FROM `workunit_results`
 		JOIN `users` ON `users`.`uid`=`workunit_results`.`user_uid`
