@@ -353,6 +353,23 @@ function get_user_withdraw_address($user_uid) {
 	return $result;
 }
 
+// Get global rating
+function get_global_rating() {
+	$data=db_query_to_array("SELECT `users`.`login`,count(*) AS 'count',SUM(`reward`) AS 'reward'
+                FROM `workunit_results`
+                JOIN `users` ON `users`.`uid`=`workunit_results`.`user_uid`
+                WHERE `workunit_results`.`is_valid`=1
+                GROUP BY `users`.`login` ORDER BY count(*) DESC LIMIT 100");
+	return $data;
+}
+
+// Get global results
+function get_global_results() {
+	//$biggest_wu=db_query_to_variable("SELECT `project_uid`, FROM `");
+	return array(
+	);
+}
+
 // For php 5 only variant for random_bytes is openssl_random_pseudo_bytes from openssl lib
 if(!function_exists("random_bytes")) {
         function random_bytes($n) {
