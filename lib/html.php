@@ -27,10 +27,12 @@ _END;
 
 // Page end, scripts and footer
 function html_page_end() {
+	global $project_counter_name;
+
 	$result=<<<_END
 <hr width=10%>
 <p>Opensource Gridcoin distribute computing project (<a href='https://github.com/sau412/microgrid'>github</a>) by Vladimir Tsarev, my nickname is sau412 on telegram, twitter, facebook, gmail, github, vk.</p>
-<p><img src='https://arikado.xyz/counter/?site=microgrid'></p>
+<p><img src='https://arikado.xyz/counter/?site=$project_counter_name'></p>
 </center>
 <script>
 
