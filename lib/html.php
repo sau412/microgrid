@@ -30,6 +30,7 @@ function html_page_end() {
 	$result=<<<_END
 <hr width=10%>
 <p>Opensource Gridcoin distribute computing project (<a href='https://github.com/sau412/microgrid'>github</a>) by Vladimir Tsarev, my nickname is sau412 on telegram, twitter, facebook, gmail, github, vk.</p>
+<p><img src='https://arikado.xyz/counter/?site=microgrid'></p>
 </center>
 <script>
 
