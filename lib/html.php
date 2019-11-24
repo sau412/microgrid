@@ -31,7 +31,7 @@ function html_page_end() {
 
 	$result=<<<_END
 <hr width=10%>
-<p>Opensource Gridcoin distribute computing project (<a href='https://github.com/sau412/microgrid'>github</a>) by Vladimir Tsarev, my nickname is sau412 on telegram, twitter, facebook, gmail, github, vk.</p>
+<p>Opensource Gridcoin distribute computing project (<a href='https://github.com/sau412/microgrid'>github</a>) by <a href='htps://arikado.xyz/'>sau412</a>.</p>
 <p><img src='https://arikado.xyz/counter/?site=$project_counter_name'></p>
 </center>
 <script>
