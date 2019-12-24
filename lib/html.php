@@ -632,7 +632,7 @@ function html_user_stats($user_uid, $token) {
 	$in_process = $results_row['in_process'];
 	$paid = $results_row['paid'];
 	$not_paid = $results_row['not_paid'];
-	$total_reward = $results_row['total_reward'];
+	$total_reward = sprintf("%0.8F",$results_row['total_reward']);
 
 	$result.=<<<_END
 <h2>User stats</h2>
