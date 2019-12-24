@@ -110,6 +110,7 @@ function html_tabs($user_uid) {
 	if($user_uid) {
 		$result.=html_menu_element("info","Info");
 		$result.=html_menu_element("comp","Compute for $currency_short");
+		$result.=html_menu_element("stats","User stats");
 		$result.=html_menu_element("rating","Rating");
 		$result.=html_menu_element("payouts","Payouts");
 		$result.=html_menu_element("settings","Settings");
@@ -602,6 +603,48 @@ _END;
 	}
 
 	$result.=<<<_END
+</table>
+</p>
+
+_END;
+
+	return $result;
+}
+
+// User results
+function html_user_stats($user_uid, $token) {
+	global $currency_short;
+
+	$result = "";
+
+	$user_uid_escaped = db_escape($user_uid);
+	$results_data = db_query_to_array("SELECT count(*) AS total,
+						SUM(IF(`is_valid`=1,1,0)) AS valid_count,
+						SUM(IF(`result_hash` IS NULL,1,0)) AS in_process,
+						SUM(IF(`reward` IS NOT NULL AND `reward`>0,1,0)) AS paid,
+						SUM(IF(`reward` IS NULL OR `reward`=0,1,0)) AS not_paid,
+						SUM(`reward`) AS total_reward
+						FROM `workunit_results` WHERE `user_uid` = '$user_uid_escaped'");
+
+	$results_row = array_pop($results_data);
+	$total = $results_row['total'];
+	$valid_count = $results_row['valid_count'];
+	$in_process = $results_row['in_process'];
+	$paid = $results_row['paid'];
+	$not_paid = $results_row['not_paid'];
+	$total_reward = $results_row['total_reward'];
+
+	$result.=<<<_END
+<h2>User stats</h2>
+<p>
+<table class='table_horizontal'>
+<tr><th>Counter</th><th>Value</th></tr>
+<tr><td>Total results</td><td>$total</td></tr>
+<tr><td>Valid results</td><td>$valid_count</td></tr>
+<tr><td>In process</td><td>$in_process</td></tr>
+<tr><td>Paid results count</td><td>$paid</td></tr>
+<tr><td>Not paid results count</td><td>$not_paid</td></tr>
+<tr><td>Total earned</td><td>$total_reward $currency_short</td></tr>
 </table>
 </p>
 

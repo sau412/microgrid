@@ -115,6 +115,9 @@ if(isset($_GET['ajax']) && isset($_GET['block'])) {
 			case 'info':
 				echo html_info();
 				break;
+			case 'stats':
+				echo html_user_stats($user_uid,$token);
+				break;
 			case 'log':
 				if(is_admin($user_uid)) {
 					echo html_log_section_admin();
