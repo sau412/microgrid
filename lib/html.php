@@ -463,7 +463,7 @@ function worker_set_status_and_progress(worker_id, status, progress) {
 }
 
 // Run worker
-function run_next_worker(worker_id, project_id) {
+function run_next_worker(worker_id, project_id, myWorker) {
 	// Run worker
 	var data = {
 		action: "get_new_task",
@@ -552,7 +552,7 @@ function repeatable_worker(project_id, worker_id) {
 	}, false);
 
 	// Run worker
-	run_next_worker(worker_id, project_id);
+	run_next_worker(worker_id, project_id, myWorker);
 }
 
 </script>
