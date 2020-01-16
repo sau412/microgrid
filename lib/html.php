@@ -490,11 +490,12 @@ function run_next_worker(worker_id, project_id, myWorker) {
 		worker_set_status_and_progress(worker_id, status, progress);
 		// Repeat after minute
 		setTimeout(function() {
-			run_next_worker(worker_id, project_id);
+			run_next_worker(worker_id, project_id, myWorker);
 		},60000);
 	});
 }
 
+// Store result of worker
 function worker_store_result(worker_id, project_id, myWorker, workunit_version, workunit_result_uid, workunit_result) {
 	data = {
 		action: 'task_store_result',
@@ -520,11 +521,12 @@ function worker_store_result(worker_id, project_id, myWorker, workunit_version, 
 		worker_set_status_and_progress(worker_id, status, progress);
 		// Repeat after minute
 		setTimeout(function() {
-			run_next_worker(worker_id, project_id);
+			worker_store_result(worker_id, project_id, myWorker, workunit_version, workunit_result_uid, workunit_result);
 		},60000);
 	});
 }
 
+// Repeatable worker itself
 function repeatable_worker(project_id, worker_id) {
 	var myWorker = new Worker('?project_script=' + project_id);
 	myWorker.addEventListener('message', function(e) {
