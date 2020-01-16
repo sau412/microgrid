@@ -456,6 +456,41 @@ function start_calculations() {
 	}
 }
 
+// Set status and progress for worker
+function worker_set_status_and_progress(worker_id, status, progress) {
+	document.getElementById("status_" + worker_id).innerHTML = status;
+	document.getElementById("progress_" + worker_id).innerHTML = progress + '&thinsp;%';
+}
+
+// Run worker
+function run_next_worker(worker_id, project_id) {
+	// Run worker
+	var data = {
+		action: "get_new_task",
+		project: project_id,
+		token: "$token"
+	};
+	$.post("./",data,function (result) {
+		status = 'working';
+		progress = '0';
+		worker_set_status_and_progress(worker_id, status, progress);
+		task_data = JSON.parse(result);
+		var start_number = task_data.start_number;
+		var stop_number = task_data.stop_number;
+		var workunit_result_uid = task_data.workunit_result_uid;
+		myWorker.postMessage([worker_id, workunit_result_uid, start_number, stop_number]);
+	})
+	.fail(function() {
+		status = "downloading repeat";
+		progress = "0";
+		worker_set_status_and_progress(worker_id, status, progress);
+		// Repeat after minute
+		setTimeout(function() {
+			run_next_worker(worker_id, project_id);
+		},60000);
+	});
+}
+
 function repeatable_worker(project_id, worker_id) {
 //	$.post("./",[action:"get_new_task",token:"$token"],function (result) {
 
@@ -465,15 +500,22 @@ function repeatable_worker(project_id, worker_id) {
 		// e.data[1] is message type: 0 progress, 1 result
 		// e.data[2] is data (progress or result itself)
 		// Progress data
+		worker_id = e.data[0];
 		if(e.data[1] == 0) {
-			document.getElementById("status_"+e.data[0]).innerHTML='working';
-			document.getElementById("progress_"+e.data[0]).innerHTML=Math.floor(e.data[2]*100) + '&thinsp;%';
+			status = 'working';
+			progress = Math.floor(e.data[2]*100);
+			worker_set_status_and_progress(worker_id, status, progress);
+			//document.getElementById("status_"+e.data[0]).innerHTML='working';
+			//document.getElementById("progress_"+e.data[0]).innerHTML=Math.floor(e.data[2]*100) + '&thinsp;%';
 		}
 		// Result data
 		else if(e.data[1] == 1) {
 			console.log('result: ', e.data);
-			document.getElementById("status_"+e.data[0]).innerHTML='uploading';
-			document.getElementById("progress_"+e.data[0]).innerHTML='100 %';
+			status = 'uploading';
+			progress = '100';
+			worker_set_status_and_progress(worker_id, status, progress);
+			//document.getElementById("status_"+e.data[0]).innerHTML='uploading';
+			//document.getElementById("progress_"+e.data[0]).innerHTML='100 %';
 			var workunit_version = e.data[2];
 			var workunit_result_uid = e.data[3];
 			var workunit_result = JSON.stringify(e.data[4]);
@@ -510,19 +552,7 @@ function repeatable_worker(project_id, worker_id) {
 	}, false);
 
 	// Run worker
-	var data = {
-		action:"get_new_task",
-		project:project_id,
-		token:"$token"
-	};
-	$.post("./",data,function (result) {
-		document.getElementById("status_"+worker_id).innerHTML='working';
-		task_data=JSON.parse(result);
-		var start_number=task_data.start_number;
-		var stop_number=task_data.stop_number;
-		var workunit_result_uid=task_data.workunit_result_uid;
-		myWorker.postMessage([worker_id,workunit_result_uid,start_number,stop_number]);
-	});
+	run_next_worker(worker_id, project_id);
 }
 
 </script>
