@@ -105,7 +105,7 @@ _END;
 function html_tabs($user_uid) {
 	global $currency_short;
 	$result="";
-	$result.="<div style='display: inline-block;'>\n";
+	$result.="<div id=tabs style='display: inline-block;'>\n";
 	$result.="<ul class=horizontal_menu>\n";
 	if($user_uid) {
 		$result.=html_menu_element("info","Info");
@@ -405,17 +405,21 @@ if(typeof(navigator.hardwareConcurrency) !== 'undefined') {
 }
 
 function start_calculations() {
-	// Disable buttons
-	document.getElementById('threads').disabled=true;
-	document.getElementById('start_button').disabled=true;
-
 	var threads = document.getElementById('threads').value;
 	var project_id = document.getElementById('project').value;
 
+	// Check threads count
 	if(threads <= 0) {
 		alert("Threads number should be positive");
 		return false;
 	}
+
+	// Disable buttons
+	document.getElementById('threads').disabled=true;
+	document.getElementById('start_button').disabled=true;
+
+	// Hide tabs
+	document.getElementById('tabs').style.display = 'none';
 
 	// Generate table
 	var calc_progress_block = document.getElementById('comp_progress_block');
