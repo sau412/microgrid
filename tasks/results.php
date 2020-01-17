@@ -4,9 +4,9 @@ require_once("../lib/db.php");
 
 db_connect();
 
-$data=db_query_to_array("SELECT `uid` FROM `workunits` WHERE `project_uid`=1 ORDER BY `start_number`");
+$result=db_query("SELECT `uid` FROM `workunits` WHERE `project_uid`=1 ORDER BY `start_number`");
 
-foreach($data as $row) {
+while($row = mysql_fetch_assoc($result)) {
 	$uid=$row['uid'];
 	$result=db_query_to_variable("SELECT `result` FROM `workunits` WHERE `uid`='$uid'");
 	if($result == "") {
