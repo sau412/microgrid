@@ -391,7 +391,10 @@ function html_compute_block($user_uid,$token) {
 <form name=load_comp_block>
 <p>Select project: <select id=project name=project>$project_selector</select></p>
 <p>Threads: <input type=number id=threads name=threads value='1'></p>
-<p><input type=button value='Start' id=start_button onClick='start_calculations()'></p>
+<p>
+<input type=button value='Start' id=start_button onClick='start_calculations()'>
+<input type=button value='Pause when completed' id=pause_button onClick='stop_on_completed()'>
+</p>
 </form>
 
 <div class=comp_progress_block id=comp_progress_block>
@@ -399,14 +402,22 @@ function html_compute_block($user_uid,$token) {
 <script>
 var progress=[];
 var status=[];
+var auto_load_next_enabled = 1;
 
 if(typeof(navigator.hardwareConcurrency) !== 'undefined') {
 	document.getElementById('threads').value=navigator.hardwareConcurrency;
 }
 
+function stop_on_complete() {
+	auto_load_next_enabled = 0;
+}
+
 function start_calculations() {
 	var threads = document.getElementById('threads').value;
 	var project_id = document.getElementById('project').value;
+
+	// Set auto continue flag
+	auto_load_next_enabled = 1;
 
 	// Check threads count
 	if(threads <= 0) {
@@ -507,8 +518,15 @@ function worker_store_result(worker_id, project_id, myWorker, workunit_version, 
 	$.post("./", data, function (reply) {
 		reply_json = JSON.parse(reply);
 		if(reply_json.result == "ok") {
-			// Run next worker
-			run_next_worker(worker_id, project_id, myWorker);
+			// Run next worker if not in pause mode
+			if(auto_load_next_enabled === 1) {
+				run_next_worker(worker_id, project_id, myWorker);
+			}
+			else {
+				status = "completed";
+				progress = "100";
+				worker_set_status_and_progress(worker_id, status, progress);
+			}
 		}
 		else {
 			// Show error
