@@ -393,7 +393,7 @@ function html_compute_block($user_uid,$token) {
 <p>Threads: <input type=number id=threads name=threads value='1'></p>
 <p>
 <input type=button value='Start' id=start_button onClick='start_calculations()'>
-<input type=button value='Pause when completed' id=pause_button onClick='stop_on_completed()'>
+<input type=button value='Pause when completed' id=pause_button onClick='stop_on_completed()' disabled>
 </p>
 </form>
 
@@ -408,8 +408,9 @@ if(typeof(navigator.hardwareConcurrency) !== 'undefined') {
 	document.getElementById('threads').value=navigator.hardwareConcurrency;
 }
 
-function stop_on_complete() {
+function stop_on_completed() {
 	auto_load_next_enabled = 0;
+	document.getElementById('pause_button').disabled=true;
 }
 
 function start_calculations() {
@@ -428,6 +429,7 @@ function start_calculations() {
 	// Disable buttons
 	document.getElementById('threads').disabled=true;
 	document.getElementById('start_button').disabled=true;
+	document.getElementById('pause_button').disabled=false;
 
 	// Hide tabs
 	document.getElementById('tabs').style.display = 'none';
