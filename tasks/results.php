@@ -17,7 +17,8 @@ foreach($data as $row) {
 		$result=str_replace(array("[","]"),"",$result);
 		$numbers=explode(",",$result);
 		foreach($numbers as $number) {
-			echo "$number\n";
+			$pair = $number + 2;
+			echo "$number $pair\n";
 		}
 	}
 }
