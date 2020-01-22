@@ -506,7 +506,10 @@ function run_next_worker(worker_id, project_id, myWorker) {
 			run_next_worker(worker_id, project_id, myWorker);
 		},60000);
 	});
-	$.post("./", {action: "get_balance"}, function() {
+	$.post("./", {
+			action: "get_balance",
+			token: "$token"
+		}, function() {
 		balance_data = JSON.parse(result);
 		document.getElementById("balance").innerHTML = result.balance;
 	});
