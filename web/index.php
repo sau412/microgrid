@@ -61,6 +61,10 @@ if(isset($action)) {
 	} else if($action=='logout') {
 		user_logout($session);
 		$message="logout_successfull";
+	} else if($action=='get_balance') {
+		$result['balance'] = get_user_balance($user_uid);
+		echo json_encode($result);
+		die();
 	} else if($action=='get_new_task') {
 		$project_uid=stripslashes($_POST['project']);
 		$workunit_result_uid=microgrid_generate_workunit_task($project_uid,$user_uid);
