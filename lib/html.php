@@ -509,9 +509,9 @@ function run_next_worker(worker_id, project_id, myWorker) {
 	$.post("./", {
 			action: "get_balance",
 			token: "$token"
-		}, function() {
+		}, function(result) {
 		balance_data = JSON.parse(result);
-		document.getElementById("balance").innerHTML = result.balance;
+		document.getElementById("balance").innerHTML = balance_data.balance;
 	});
 }
 
