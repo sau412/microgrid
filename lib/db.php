@@ -13,9 +13,10 @@ function db_connect() {
 function db_query($query) {
 	$result=mysql_query($query);
 	if($result===FALSE) {
-		$query_escaped=db_escape($query);
-		mysql_query("INSERT INTO `log` (`message`) VALUES ('$query_escaped')");
-		die("Query error: $query");
+		$message = "MySQL query error: ".mysql_error()."\nQuery: $query";
+		$message_escaped=db_escape($message);
+		mysql_query("INSERT INTO `log` (`message`) VALUES ('$message_escaped')");
+		die("$message");
 	}
 	return $result;
 }
@@ -91,6 +92,10 @@ if(!function_exists("mysql_pconnect")) {
 	function mysql_insert_id() {
 		global $mysqli_res;
 		return mysqli_insert_id($mysqli_res);
+	}
+	function mysql_error() {
+		global $mysqli_res;
+		return mysqli_error($mysqli_res);
 	}
 }
 ?>
