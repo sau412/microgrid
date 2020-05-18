@@ -9,10 +9,9 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 
 	db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`projects` READ");
 
-	// Workunits, that neither completed, nor calculated by that user before
-	$exists_uid=db_query_to_variable("SELECT `workunits`.`uid` FROM `workunits`
-LEFT OUTER JOIN `workunit_results` wr ON wr.`workunit_uid` = `workunits`.`uid` AND `user_uid`='$user_uid_escaped'
-WHERE `project_uid`='$project_uid_escaped' AND `is_completed`=0 AND wr.`uid` IS NULL AND `in_progress`=0");
+	$exists_uid=db_query_to_variable("SELECT `uid` FROM `workunits`
+WHERE `project_uid`='$project_uid_escaped' AND `is_completed`=0
+AND `uid` NOT IN (SELECT `workunit_uid` FROM `workunit_results` WHERE `user_uid`='$user_uid_escaped') AND `in_progress`=0");
 
 	if($exists_uid) {
 		$workunit_uid=$exists_uid;
