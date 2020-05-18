@@ -93,7 +93,10 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 				if($reward_amount==0) $reward_amount=0;
 				$reward_amount_escaped=db_escape($reward_amount);
 				db_query("UPDATE `workunits` SET `in_progress`=0,`is_completed`=1,`result`='$result_escaped' WHERE `uid`='$workunit_uid_escaped'");
-				db_query("UPDATE `users` SET `balance`=`balance`+'$reward_amount_escaped' WHERE `uid` IN (SELECT `user_uid` FROM `workunit_results` WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash')");
+				db_query("UPDATE `users`
+							JOIN `workunit_results` ON `users`.`uid` = `workunit_results`.`user_uid`
+							SET `balance`=`balance`+'$reward_amount_escaped'
+							WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
 				db_query("UPDATE `workunit_results` SET `is_valid`=1,`reward`='$reward_amount_escaped' WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
 				db_query("UPDATE `workunit_results` SET `is_valid`=0,`reward`=0 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`<>'$result_hash'");
 			}
