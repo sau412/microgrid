@@ -411,6 +411,7 @@ if(typeof(navigator.hardwareConcurrency) !== 'undefined') {
 function stop_on_completed() {
 	auto_load_next_enabled = 0;
 	document.getElementById('pause_button').disabled=true;
+	document.getElementById('start_button').disabled=false;
 }
 
 function start_calculations() {
