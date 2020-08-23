@@ -7,7 +7,7 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 
 	$project_retries=db_query_to_variable("SELECT `retries` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 
-	db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`projects` READ");
+	db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`projects` READ, `variables` WRITE");
 
 	// Workunits, that neither completed, nor calculated by that user before
 	$exists_uid=db_query_to_variable("SELECT `workunits`.`uid` FROM `workunits`
@@ -28,15 +28,19 @@ LIMIT 1");
 	db_query("INSERT INTO `workunit_results` (`workunit_uid`,`user_uid`) VALUES ('$workunit_uid_escaped','$user_uid_escaped')");
 	$workunit_result_uid=mysql_insert_id();
 
-	db_query("UNLOCK TABLES");
-
+	// Inc results counter
 	inc_variable("results", 1);
+
+	db_query("UNLOCK TABLES");
 
 	return $workunit_result_uid;
 }
 
 function microgrid_generate_workunit($project_uid) {
 	$project_uid_escaped=db_escape($project_uid);
+
+	db_query("LOCK TABLES `workunits` WRITE,`projects` READ, `variables` WRITE");
+
 	$workunit_step=db_query_to_variable("SELECT `step` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 	$workunit_max_stop=db_query_to_variable("SELECT MAX(`stop_number`) FROM `workunits` WHERE `project_uid`='$project_uid_escaped'");
 	if($workunit_max_stop === NULL) {
@@ -47,7 +51,10 @@ function microgrid_generate_workunit($project_uid) {
 	db_query("INSERT INTO `workunits` (`project_uid`,`start_number`,`stop_number`)
 				VALUES ('$project_uid_escaped','$start_number','$stop_number')");
 	$uid = mysql_insert_id();
+
 	inc_variable("workunits", 1);
+
+	db_query("UNLOCK TABLES");
 
 	return $uid;
 }

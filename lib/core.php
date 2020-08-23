@@ -52,11 +52,11 @@ function set_variable($name,$value) {
 
 // Increase variable counter
 function inc_variable($name, $delta) {
-	db_query("LOCK TABLES `variables` WRITE");
+	//db_query("LOCK TABLES `variables` WRITE");
 	$value = get_variable($name);
 	if(!$value) $value = 0;
 	set_variable($name, $value + $delta);
-	db_query("UNLOCK TABLES");
+	//db_query("UNLOCK TABLES");
 }
 
 // Create or get session
