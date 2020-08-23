@@ -297,8 +297,10 @@ function is_admin($user_uid) {
 function change_user_balance($user_uid,$balance_delta) {
 	$user_uid_escaped=db_escape($user_uid);
 	$balance_delta_escaped=db_escape($balance_delta);
-	db_query("UPDATE `users` SET `balance`=`balance`+'$balance_delta_escaped' WHERE `uid`='$user_uid_escaped'");
-	db_query("UPDATE `users` SET `total_earned`=`total_earned`+'$balance_delta_escaped' WHERE `uid`='$user_uid_escaped'");
+	db_query("UPDATE `users`
+				SET `balance`=`balance`+'$balance_delta_escaped',
+				`total_earned`=`total_earned`+'$balance_delta_escaped'
+				WHERE `uid`='$user_uid_escaped'");
 }
 
 // Get user deposit address
