@@ -77,6 +77,7 @@ if(isset($action)) {
 		$workunit_result_uid=stripslashes($_POST['workunit_result_uid']);
 		$save_result=microgrid_save_workunit_results($user_uid,$workunit_result_uid,$version,$result);
 		echo json_encode($save_result);
+		users_update_active_time($user_uid);
 		die();
 	} else if($action=='user_change_settings') {
 		$mail=stripslashes($_POST['mail']);

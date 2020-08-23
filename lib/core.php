@@ -382,6 +382,12 @@ function get_global_results() {
 	);
 }
 
+// Update last activity
+function users_update_active_time($user_uid) {
+	$user_uid_escaped = db_escape($user_uid);
+	db_query("UPDATE `users` SET `active_time`=NOW() WHERE `uid` = '$user_uid_escaped'");
+}
+
 // For php 5 only variant for random_bytes is openssl_random_pseudo_bytes from openssl lib
 if(!function_exists("random_bytes")) {
         function random_bytes($n) {
