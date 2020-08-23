@@ -28,7 +28,8 @@ LIMIT 1");
 	db_query("INSERT INTO `workunit_results` (`workunit_uid`,`user_uid`) VALUES ('$workunit_uid_escaped','$user_uid_escaped')");
 	$workunit_result_uid=mysql_insert_id();
 
-	// Inc results counter
+	// Inc results counters
+	db_query("UPDATE `users` SET `total_results` = `total_results` + 1 WHERE `uid`='$user_uid_escaped'");
 	inc_variable("results", 1);
 
 	db_query("UNLOCK TABLES");

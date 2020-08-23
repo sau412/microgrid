@@ -299,7 +299,7 @@ function change_user_balance($user_uid,$balance_delta) {
 	$balance_delta_escaped=db_escape($balance_delta);
 	db_query("UPDATE `users`
 				SET `balance`=`balance`+'$balance_delta_escaped',
-				`total_earned`=`total_earned`+'$balance_delta_escaped'
+					`total_earned`=`total_earned`+'$balance_delta_escaped'
 				WHERE `uid`='$user_uid_escaped'");
 }
 
