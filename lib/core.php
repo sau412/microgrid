@@ -50,6 +50,15 @@ function set_variable($name,$value) {
 	db_query("INSERT INTO `variables` (`name`,`value`) VALUES ('$name_escaped','$value_escaped') ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)");
 }
 
+// Increase variable counter
+function inc_variable($name, $delta) {
+	db_query("LOCK TABLES `variables` WRITE");
+	$value = get_variable($name);
+	if(!$value) $value = 0;
+	set_variable($name, $value + $delta);
+	db_query("UNLOCK TABLES");
+}
+
 // Create or get session
 function get_session() {
 	if(isset($_COOKIE['session_id']) && validate_ascii($_COOKIE['session_id'])) {
