@@ -269,57 +269,6 @@ function get_user_balance($user_uid) {
 	return $balance;
 }
 
-// Update balance
-function update_user_balance($user_uid) {
-	$user_uid_escaped=db_escape($user_uid);
-	$amount_received=db_query_to_variable("SELECT SUM(`amount`) FROM `transactions` WHERE `user_uid`='$user_uid_escaped' AND `status` IN ('received')");
-	$amount_sent=db_query_to_variable("SELECT SUM(`amount`) FROM `transactions` WHERE `user_uid`='$user_uid_escaped' AND `status` IN ('processing','sent')");
-	$amount_bets=db_query_to_variable("SELECT SUM(`bet`) FROM `rolls` WHERE `user_uid`='$user_uid_escaped'");
-	$amount_profits=db_query_to_variable("SELECT SUM(`profit`) FROM `rolls` WHERE `user_uid`='$user_uid_escaped'");
-	$balance=$amount_received-$amount_sent-$amount_bets+$amount_profits;
-	db_query("UPDATE `users` SET `balance`='$balance' WHERE `uid`='$user_uid_escaped'");
-}
-
-// Send
-function user_withdraw($user_uid,$amount) {
-	global $currency_short;
-
-	// Check payouts enabled
-	if(get_variable("payouts_enabled")==0) return FALSE;
-
-	$address=get_user_withdraw_address($user_uid);
-
-	// Validate data
-	if(!validate_number($amount)) return FALSE;
-	if(!validate_ascii($address)) return FALSE;
-
-	$min_amount=get_variable("withdraw_min");
-	if($amount<$min_amount) return FALSE;
-
-	if($address=="") return FALSE;
-
-	// Check user balance
-	$balance=get_user_balance($user_uid);
-	if($balance<$amount) return FALSE;
-
-	// Add transaction to schedule
-	$user_uid_escaped=db_escape($user_uid);
-	$amount_escaped=db_escape($amount);
-	$address_escaped=db_escape($address);
-	db_query("INSERT INTO `transactions` (`user_uid`,`amount`,`address`,`status`) VALUES ('$user_uid_escaped','$amount_escaped','$address_escaped','processing')");
-	$transaction_uid=mysql_insert_id();
-
-	// Adjust user balance
-	update_user_balance($user_uid);
-
-	// Send notifications
-	$username=get_username_by_uid($user_uid);
-	write_log("'$username' withdraw '$amount' $currency_short to address '$address'",$user_uid);
-	//notify_user($user_uid,"$username sent $amount $currency_short","Amount: $amount $currency_short\nAddress: $address\nIP: ".$_SERVER['REMOTE_ADDR']);
-
-	return $transaction_uid;
-}
-
 function recaptcha_check($response) {
 	global $recaptcha_private_key;
 	$recaptcha_url="https://www.google.com/recaptcha/api/siteverify";
@@ -349,6 +298,7 @@ function change_user_balance($user_uid,$balance_delta) {
 	$user_uid_escaped=db_escape($user_uid);
 	$balance_delta_escaped=db_escape($balance_delta);
 	db_query("UPDATE `users` SET `balance`=`balance`+'$balance_delta_escaped' WHERE `uid`='$user_uid_escaped'");
+	db_query("UPDATE `users` SET `total_earned`=`total_earned`+'$balance_delta_escaped' WHERE `uid`='$user_uid_escaped'");
 }
 
 // Get user deposit address
