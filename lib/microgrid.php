@@ -85,10 +85,11 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 		return array("result"=>"fail","message"=>"Incorrect module version, refresh page and start again");
 	}
 
-	db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`users` WRITE,`projects` READ");
+	db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`users` WRITE,`projects` READ, `variables` WRITE");
 
 	// Update workunit_result for specific user
 	db_query("UPDATE `workunit_results` SET `result_hash`='$result_hash_escaped',`completed`=NOW() WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
+	inc_variable("results_complete", 1);
 
 	// Check is results matches, mark workunits as completed
 	if($workunit_uid!==NULL) {
@@ -114,6 +115,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 							WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
 				db_query("UPDATE `workunit_results` SET `is_valid`=1,`reward`='$reward_amount_escaped' WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
 				db_query("UPDATE `workunit_results` SET `is_valid`=0,`reward`=0 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`<>'$result_hash'");
+				inc_variable("workunits_complete", 1);
 			}
 		}
 	}
