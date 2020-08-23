@@ -29,6 +29,9 @@ LIMIT 1");
 	$workunit_result_uid=mysql_insert_id();
 
 	db_query("UNLOCK TABLES");
+
+	inc_variable("results", 1);
+
 	return $workunit_result_uid;
 }
 
@@ -41,13 +44,18 @@ function microgrid_generate_workunit($project_uid) {
 	}
 	$start_number=$workunit_max_stop+1;
 	$stop_number=$workunit_max_stop+1+$workunit_step;
-	db_query("INSERT INTO `workunits` (`project_uid`,`start_number`,`stop_number`) VALUES ('$project_uid_escaped','$start_number','$stop_number')");
-	return mysql_insert_id();
+	db_query("INSERT INTO `workunits` (`project_uid`,`start_number`,`stop_number`)
+				VALUES ('$project_uid_escaped','$start_number','$stop_number')");
+	$uid = mysql_insert_id();
+	inc_variable("workunits", 1);
+
+	return $uid;
 }
 
 function microgrid_get_workunit_data_by_workunit_result_uid($workunit_result_uid) {
 	$workunit_result_uid_escaped=db_escape($workunit_result_uid);
-	$workunit_data=db_query_to_array("SELECT wr.`uid` AS workunit_result_uid,w.uid,w.project_uid,w.start_number,w.stop_number FROM `workunits` AS w
+	$workunit_data=db_query_to_array("SELECT wr.`uid` AS workunit_result_uid,w.uid,w.project_uid,w.start_number,w.stop_number
+FROM `workunits` AS w
 JOIN `workunit_results` AS wr ON wr.`workunit_uid`=w.`uid`
 WHERE wr.`uid`='$workunit_result_uid_escaped'");
 	$result=array_pop($workunit_data);
