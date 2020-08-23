@@ -7,7 +7,7 @@ db_connect();
 
 $users=db_query_to_variable("SELECT count(*) FROM `users`");
 
-$active_users=db_query_to_variable("SELECT count(DISTINCT `user_uid`) FROM `workunit_results` WHERE DATE_SUB(NOW(),INTERVAL 1 HOUR)<`created`");
+$active_users=db_query_to_variable("SELECT count(DISTINCT `uid`) FROM `users` WHERE DATE_SUB(NOW(),INTERVAL 1 HOUR)<`active_time`");
 
 //$workunits=db_query_to_variable("SELECT count(*) FROM `workunits`");
 //$results=db_query_to_variable("SELECT count(*) FROM `workunit_results`");
