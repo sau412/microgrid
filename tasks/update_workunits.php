@@ -17,7 +17,7 @@ foreach($workunits_in_progress_array as $row) {
 
 	$is_old = db_query_to_variable("SELECT 1 FROM `workunit_results`
 										WHERE `result_hash` IS NULL AND
-											DATE_SUB(NOW(),INTERVAL $workunit_max_interval) < `created` AND
+											DATE_SUB(NOW(),INTERVAL $workunit_max_interval) > `created` AND
 											`workunit_uid` = '$workunit_uid_escaped'");
 	if($is_old) {
 		echo "workunit_uid $workunit_uid\n";
