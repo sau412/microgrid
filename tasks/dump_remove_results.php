@@ -15,10 +15,17 @@ foreach($projects_array as $project) {
                         ORDER BY `start_number` LIMIT 100");
     while($row = mysql_fetch_assoc($result)) {
         if($row['is_completed'] == 0) break;
+        $uid = $row['uid'];
+        $uid_escaped = db_escape($uid);
+        echo "Exporing project $project_uid workunit $uid";
+
         $start = $row['start_number'];
         $stop = $row['stop_number'];
         $result_text = $row['result'];
         $csv = "$start;$stop;$result_text;\n";
         file_put_contents("../../results/${project_uid}.txt", $csv, FILE_APPEND);
+
+        db_query("DELETE FROM `workunits` WHERE `uid` = '$uid_escaped'");
+        db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` = '$uid_escaped'");
     }
 }
