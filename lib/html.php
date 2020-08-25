@@ -675,13 +675,13 @@ function html_user_stats($user_uid, $token) {
 	$result = "";
 
 	$user_uid_escaped = db_escape($user_uid);
-	$results_data = db_query_to_array("SELECT count(*) AS total,
-						SUM(IF(`is_valid`=1,1,0)) AS valid_count,
-						SUM(IF(`result_hash` IS NULL,1,0)) AS in_process,
-						SUM(IF(`reward` IS NOT NULL AND `reward`>0,1,0)) AS paid,
-						SUM(IF(`reward` IS NULL OR `reward`=0,1,0)) AS not_paid,
-						SUM(`reward`) AS total_reward
-						FROM `workunit_results` WHERE `user_uid` = '$user_uid_escaped'");
+	$results_data = db_query_to_array("SELECT `total_results` AS total,
+						`valid_results` AS valid_count,
+						`in_process` AS in_process,
+						`paid_results` AS paid,
+						`not_paid_results` AS not_paid,
+						`total_earned` AS total_reward
+						FROM `users` WHERE `uid` = '$user_uid_escaped'");
 
 	$results_row = array_pop($results_data);
 	$total = $results_row['total'];
