@@ -24,7 +24,7 @@ foreach($workunits_in_progress_array as $row) {
 		db_query("UPDATE `workunits` SET `in_progress` = 0 WHERE `uid` = '$workunit_uid_escaped'");
 	}
 }
-die();
+
 $old_workunits_array=db_query_to_array("SELECT `uid`, `workunit_uid`
 		FROM `workunit_results`
 		WHERE `result_hash` IS NULL AND DATE_SUB(NOW(),INTERVAL $workunit_max_interval)>`created`");
