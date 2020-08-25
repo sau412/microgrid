@@ -636,14 +636,9 @@ function html_rating_block($user_uid,$token) {
 
 	$result="";
 
-	$user_uid_escaped=db_escape($user_uid);
-	$rating_data=json_decode(get_variable("rating_cache"),TRUE);
-	/*$rating_data=db_query_to_array("SELECT `users`.`login`,count(*) AS 'count',SUM(`reward`) AS 'reward'
-		FROM `workunit_results`
-		JOIN `users` ON `users`.`uid`=`workunit_results`.`user_uid`
-		WHERE `workunit_results`.`is_valid`=1
-		GROUP BY `users`.`login` ORDER BY count(*) DESC LIMIT 100");
-*/
+	//$user_uid_escaped=db_escape($user_uid);
+	$rating_data=get_global_rating();
+
 	$result.=<<<_END
 <h2>Rating</h2>
 <p>
@@ -654,8 +649,8 @@ _END;
 
 	foreach($rating_data as $rating_row) {
 		$login=$rating_row['login'];
-		$count=$rating_row['count'];
-		$reward=$rating_row['reward'];
+		$count=$rating_row['total_results'];
+		$reward=$rating_row['total_earned'];
 
 		$login_html=html_escape($login);
 		$reward=floor($reward);
