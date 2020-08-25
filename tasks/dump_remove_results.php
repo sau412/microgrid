@@ -12,7 +12,7 @@ foreach($projects_array as $project) {
 
     $result = db_query("SELECT `uid`, `start_number`, `stop_number`, `result`, `is_completed` FROM `workunits`
                         WHERE `project_uid`='$project_uid_escaped' AND DATE_SUB(NOW(), INTERVAL 1 MONTH) > `timestamp`
-                        ORDER BY `start_number` LIMIT 1000");
+                        ORDER BY `start_number` LIMIT 10000");
     while($row = mysql_fetch_assoc($result)) {
         if($row['is_completed'] == 0) break;
         $uid = $row['uid'];
