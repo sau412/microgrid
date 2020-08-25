@@ -319,7 +319,7 @@ function get_user_withdraw_address($user_uid) {
 
 // Get global rating
 function get_global_rating() {
-	$data=db_query_to_array("SELECT `users`.`login`, 'total_earned', 'total_results'
+	$data=db_query_to_array("SELECT `users`.`login`, `total_earned`, `total_results`
                 FROM `users`
                 ORDER BY `total_results` DESC LIMIT 100");
 	return $data;

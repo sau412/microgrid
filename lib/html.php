@@ -637,7 +637,7 @@ function html_rating_block($user_uid,$token) {
 	$result="";
 
 	//$user_uid_escaped=db_escape($user_uid);
-	$rating_data=get_global_rating();
+	$rating_data = get_global_rating();
 
 	$result.=<<<_END
 <h2>Rating</h2>
