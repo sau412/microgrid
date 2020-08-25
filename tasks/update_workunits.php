@@ -21,6 +21,7 @@ foreach($workunits_in_progress_array as $row) {
 											`workunit_uid` = '$workunit_uid_escaped'");
 	if($is_old) {
 		echo "workunit_uid $workunit_uid\n";
+		db_query("UPDATE `workunits` SET `in_progress` = 0 WHERE `uid` = '$workunit_uid_escaped'");
 	}
 }
 die();
