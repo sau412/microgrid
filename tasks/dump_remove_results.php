@@ -17,8 +17,8 @@ foreach($projects_array as $project) {
         if($row['is_completed'] == 0) break;
         $start = $row['start_number'];
         $stop = $row['stop_number'];
-        $result = $row['result'];
-        $csv = "$start;$stop;$result;\n";
+        $result_text = $row['result'];
+        $csv = "$start;$stop;$result_text;\n";
         file_put_contents("../../results/${project_uid}.txt", $csv, FILE_APPEND);
     }
 }
