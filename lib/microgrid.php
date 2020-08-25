@@ -100,7 +100,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 		// Decrease units in work
 		db_query("UPDATE `workunits` SET `in_progress`=`in_progress`-1 WHERE `uid`='$workunit_uid_escaped'");
 		// Dec results counters
-		db_query("UPDATE `users` SET `in_process` = `in_process` - 1 WHERE `uid`='$user_uid_escaped'");
+		db_query("UPDATE `users` SET `in_process` = GREATEST(`in_process` - 1, 0) WHERE `uid`='$user_uid_escaped'");
 		// Get project uid
 		if($project_uid!==NULL) {
 			// Check similar results
@@ -113,7 +113,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 				$reward_amount=db_query_to_variable("SELECT `workunit_price` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 				if($reward_amount == 0) $reward_amount = 0;
 				$reward_amount_escaped = db_escape($reward_amount);
-				
+
 				db_query("UPDATE `workunits` SET `in_progress`=0,`is_completed`=1,`result`='$result_escaped' WHERE `uid`='$workunit_uid_escaped'");
 				// Get user uids
 				$results_array = db_query_to_array("SELECT `uid`, `user_uid`, `result_hash` FROM `workunit_results`
