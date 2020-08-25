@@ -15,11 +15,11 @@ foreach($workunits_in_progress_array as $row) {
 	$workunit_uid = $row['uid'];
 	$workunit_uid_escaped = db_escape($workunit_uid);
 
-	$is_old = db_query_to_variable("SELECT 1 FROM `workunit_results`
+	$is_new = db_query_to_variable("SELECT 1 FROM `workunit_results`
 										WHERE `result_hash` IS NULL AND
-											DATE_SUB(NOW(),INTERVAL $workunit_max_interval) > `created` AND
+											DATE_SUB(NOW(),INTERVAL $workunit_max_interval) < `created` AND
 											`workunit_uid` = '$workunit_uid_escaped'");
-	if($is_old) {
+	if(!$is_new) {
 		echo "workunit_uid $workunit_uid\n";
 		db_query("UPDATE `workunits` SET `in_progress` = 0 WHERE `uid` = '$workunit_uid_escaped'");
 	}
