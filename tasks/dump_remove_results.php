@@ -10,6 +10,8 @@ foreach($projects_array as $project) {
     $project_uid = $project['uid'];
     $project_uid_escaped = db_escape($project_uid);
 
+    echo "Exporting project $project_uid\n";
+
     $result = db_query("SELECT `uid`, `start_number`, `stop_number`, `result`, `is_completed` FROM `workunits`
                         WHERE `project_uid`='$project_uid_escaped' AND DATE_SUB(NOW(), INTERVAL 1 MONTH) > `timestamp`
                         ORDER BY `start_number` LIMIT 10000");
@@ -28,4 +30,5 @@ foreach($projects_array as $project) {
         db_query("DELETE FROM `workunits` WHERE `uid` = '$uid_escaped'");
         db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` = '$uid_escaped'");
     }
+    echo "Exporting project $project_uid done\n";
 }
