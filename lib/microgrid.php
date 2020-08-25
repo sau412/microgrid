@@ -29,9 +29,8 @@ LIMIT 1");
 	$workunit_result_uid=mysql_insert_id();
 
 	// Inc results counters
-	db_query("UPDATE `users` SET `total_results` = `total_results` + 1,
-									`in_process` = `in_process` + 1
-				WHERE `uid`='$user_uid_escaped'");
+	db_query("UPDATE `users` SET `total_results` = `total_results` + 1 WHERE `uid`='$user_uid_escaped'");
+	db_query("UPDATE `users` SET `in_process` = `in_process` + 1 WHERE `uid`='$user_uid_escaped'");
 	inc_variable("results", 1);
 
 	db_query("UNLOCK TABLES");
@@ -90,7 +89,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 		return array("result"=>"fail", "message"=>"Incorrect module version, refresh page and start again");
 	}
 
-	db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`users` WRITE,`projects` READ, `variables` WRITE");
+	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `users` WRITE, `projects` READ, `variables` WRITE");
 
 	// Update workunit_result for specific user
 	db_query("UPDATE `workunit_results` SET `result_hash`='$result_hash_escaped',`completed`=NOW() WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
@@ -100,7 +99,8 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 	if($workunit_uid!==NULL) {
 		// Decrease units in work
 		db_query("UPDATE `workunits` SET `in_progress`=`in_progress`-1 WHERE `uid`='$workunit_uid_escaped'");
-
+		// Dec results counters
+		db_query("UPDATE `users` SET `in_process` = `in_process` - 1 WHERE `uid`='$user_uid_escaped'");
 		// Get project uid
 		if($project_uid!==NULL) {
 			// Check similar results
@@ -111,15 +111,42 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 
 			if($count>=$required_amount) {
 				$reward_amount=db_query_to_variable("SELECT `workunit_price` FROM `projects` WHERE `uid`='$project_uid_escaped'");
-				if($reward_amount==0) $reward_amount=0;
-				$reward_amount_escaped=db_escape($reward_amount);
+				if($reward_amount == 0) $reward_amount = 0;
+				
 				db_query("UPDATE `workunits` SET `in_progress`=0,`is_completed`=1,`result`='$result_escaped' WHERE `uid`='$workunit_uid_escaped'");
-				db_query("UPDATE `users`
+				// Get user uids
+				$results_array = db_query_to_array("SELECT `uid`, `user_uid`, `result_hash` FROM `workunit_results`
+														WHERE `workunit_uid` = '$workunit_uid_escaped'");
+				foreach($results_array as $result) {
+					$result_uid = $result['uid'];
+					$result_user_uid = $result['user_uid'];
+					$result_result_hash = $result['result_hash'];
+
+					$result_uid_escaped = db_escape($result_uid);
+					$result_user_uid_escaped = db_escape($result_user_uid);
+
+					if($result_result_hash == $result_hash) {
+						// Valid results
+						db_query("UPDATE `workunit_results` SET `is_valid`=1, `reward`='$reward_amount_escaped'
+									WHERE `uid`='$result_uid_escaped'");
+						change_user_balance($result_user_uid, $reward_amount);
+						db_query("UPDATE `users` SET `valid_results` = `valid_results` + 1 WHERE `uid`='$result_user_uid_escaped'");
+						db_query("UPDATE `users` SET `paid_results` = `paid_results` + 1 WHERE `uid`='$result_user_uid_escaped'");
+					}
+					else {
+						// Invalid results
+						db_query("UPDATE `workunit_results` SET `is_valid`=0, `reward`='0' WHERE `uid`='$result_uid_escaped'");
+						db_query("UPDATE `users` SET `not_paid_results` = `not_paid_results` + 1 WHERE `uid`='$result_user_uid_escaped'");
+					}
+					db_query("UPDATE `users` SET `in_process` = `in_process` - 1 WHERE `uid`='$result_user_uid_escaped'");
+				}
+
+				/*db_query("UPDATE `users`
 							JOIN `workunit_results` ON `users`.`uid` = `workunit_results`.`user_uid`
 							SET `balance`=`balance`+'$reward_amount_escaped'
-							WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
-				db_query("UPDATE `workunit_results` SET `is_valid`=1,`reward`='$reward_amount_escaped' WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
-				db_query("UPDATE `workunit_results` SET `is_valid`=0,`reward`=0 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`<>'$result_hash'");
+							WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");*/
+				//db_query("UPDATE `workunit_results` SET `is_valid`=1,`reward`='$reward_amount_escaped' WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
+				//db_query("UPDATE `workunit_results` SET `is_valid`=0,`reward`=0 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`<>'$result_hash'");
 				inc_variable("workunits_complete", 1);
 			}
 		}
