@@ -17,7 +17,7 @@ foreach($projects_array as $project) {
         if($row['is_completed'] == 0) break;
         $uid = $row['uid'];
         $uid_escaped = db_escape($uid);
-        echo "Exporing project $project_uid workunit $uid";
+        echo "Exporing project $project_uid workunit $uid\n";
 
         $start = $row['start_number'];
         $stop = $row['stop_number'];
