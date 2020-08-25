@@ -16,7 +16,10 @@ foreach($projects_array as $project) {
                         WHERE `project_uid`='$project_uid_escaped' AND DATE_SUB(NOW(), INTERVAL 1 MONTH) > `timestamp`
                         ORDER BY `start_number` LIMIT 10000");
     while($row = mysql_fetch_assoc($result)) {
-        if($row['is_completed'] == 0) break;
+        if($row['is_completed'] == 0) {
+            echo "Incompleted result found, break\n";
+            break;
+        }
         $uid = $row['uid'];
         $uid_escaped = db_escape($uid);
         echo "Exporing project $project_uid workunit $uid\n";
