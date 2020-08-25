@@ -112,6 +112,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 			if($count>=$required_amount) {
 				$reward_amount=db_query_to_variable("SELECT `workunit_price` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 				if($reward_amount == 0) $reward_amount = 0;
+				$reward_amount_escaped = db_escape($reward_amount);
 				
 				db_query("UPDATE `workunits` SET `in_progress`=0,`is_completed`=1,`result`='$result_escaped' WHERE `uid`='$workunit_uid_escaped'");
 				// Get user uids
