@@ -116,7 +116,7 @@ function html_tabs($user_uid) {
 		$result.=html_menu_element("settings","Settings");
 		if(is_admin($user_uid)) {
 			$result.=html_menu_element("control","Control");
-			$result.=html_menu_element("log","Log");
+			//$result.=html_menu_element("log","Log");
 		}
 	} else {
 		$result.=html_menu_element("info","Info");
