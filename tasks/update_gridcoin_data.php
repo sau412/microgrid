@@ -4,6 +4,7 @@ if(!isset($argc)) die();
 
 // Gridcoinresearch send rewards
 require_once("../lib/settings.php");
+require_once("../lib/logger.php");
 require_once("../lib/db.php");
 require_once("../lib/core.php");
 require_once("../lib/gridcoin_web_wallet.php");

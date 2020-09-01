@@ -4,6 +4,7 @@ if(!isset($argc)) die();
 
 // Update workunits
 require_once("../lib/settings.php");
+require_once("../lib/logger.php");
 require_once("../lib/db.php");
 require_once("../lib/core.php");
 
