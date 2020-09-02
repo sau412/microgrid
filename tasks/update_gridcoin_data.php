@@ -9,6 +9,13 @@ require_once("../lib/db.php");
 require_once("../lib/core.php");
 require_once("../lib/gridcoin_web_wallet.php");
 
+$f=fopen("/tmp/lockfile_microgrid","w");
+if($f) {
+        echo "Checking locks\n";
+        if(!flock($f,LOCK_EX|LOCK_NB)) {
+                die("Lockfile locked\n");
+        }
+}
 // Check if unsent rewards exists
 db_connect();
 
