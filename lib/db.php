@@ -13,10 +13,11 @@ function db_connect() {
 function db_query($query) {
 	$result=mysql_query($query);
 	if($result===FALSE) {
-		$message = "MySQL query error: ".mysql_error()."\nQuery: $query";
-		$message_escaped=db_escape($message);
-		mysql_query("INSERT INTO `log` (`message`) VALUES ('$message_escaped')");
-		die("$message");
+		$message["mysql_error"] = mysql_error();
+        $message["query"] = $query;
+        $message["debug_backtrace"] = debug_backtrace();
+        log_write($message, 3);
+		die("Query error");
 	}
 	return $result;
 }
