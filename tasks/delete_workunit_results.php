@@ -6,7 +6,7 @@ require_once("../lib/db.php");
 db_connect();
 
 echo "Deleting all finished...\n";
-db_query("DELETE FROM `workunit_results` WHERE `is_valid` IS NOT NULL AND DATE_SUB(NOW(), INTERVAL 1 DAY) > `created`");
+db_query("DELETE FROM `workunit_results` WHERE  DATE_SUB(NOW(), INTERVAL $workunit_max_interval) > `created`");
 
 /*
 echo "Deleting all not linked to workunits...\n";
