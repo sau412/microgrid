@@ -45,3 +45,5 @@ db_query("DELETE FROM `workunits` WHERE `uid` IN ('$uids_to_delete_string_escape
 
 echo "Deleting results...\n";
 db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` IN ('$uids_to_delete_string_escaped')");
+
+echo "Done\n";
