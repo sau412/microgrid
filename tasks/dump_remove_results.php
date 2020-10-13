@@ -14,7 +14,7 @@ foreach($projects_array as $project) {
     echo "Exporting project $project_uid\n";
 
     $result = db_query("SELECT `uid`, `start_number`, `stop_number`, `result`, `is_completed` FROM `workunits`
-                        WHERE `project_uid`='$project_uid_escaped' AND DATE_SUB(NOW(), INTERVAL 1 MONTH) > `timestamp`
+                        WHERE `project_uid`='$project_uid_escaped' AND DATE_SUB(NOW(), INTERVAL 1 DAY) > `timestamp`
                         ORDER BY `start_number` LIMIT 1000");
     while($row = mysql_fetch_assoc($result)) {
         $uid = $row['uid'];
