@@ -7,6 +7,7 @@ db_connect();
 
 $projects_array = db_query_to_array("SELECT `uid` FROM `projects`");
 
+$uids_to_delete = [];
 foreach($projects_array as $project) {
     $project_uid = $project['uid'];
     $project_uid_escaped = db_escape($project_uid);
@@ -29,12 +30,20 @@ foreach($projects_array as $project) {
         $stop = $row['stop_number'];
         $result_text = $row['result'];
         $csv = "$start;$stop;$result_text;\n";
-echo "Saving...\n";
         file_put_contents("../../results/${project_uid}.txt", $csv, FILE_APPEND);
-echo "Deleting...\n";
+        $uids_to_delete[] = $uid_escaped;
         db_query("DELETE FROM `workunits` WHERE `uid` = '$uid_escaped'");
         db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` = '$uid_escaped'");
-echo "Deleting done\n";
     }
     echo "Exporting project $project_uid done\n";
 }
+
+$uids_to_delete_string_escaped = implode("','", $uids_to_delete);
+
+echo "Deleting workunits...\n";
+echo("DELETE FROM `workunits` WHERE `uid` IN ('$uids_to_delete_string_escaped')");
+db_query("DELETE FROM `workunits` WHERE `uid` IN ('$uids_to_delete_string_escaped')");
+
+echo "Deleting results...\n";
+echo("DELETE FROM `workunit_results` WHERE `workunit_uid` IN ('$uids_to_delete_string_escaped')");
+db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` IN ('$uids_to_delete_string_escaped')");
