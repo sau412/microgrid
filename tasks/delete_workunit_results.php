@@ -5,6 +5,11 @@ require_once("../lib/db.php");
 
 db_connect();
 
+echo "Deleting all finished...\n";
+db_query("DELETE FROM `workunit_results` WHERE `is_valid` IS NOT NULL AND DATE_SUB(NOW(), INTERVAL 1 DAY) > `created`");
+
+/*
+echo "Deleting all not linked to workunits...\n";
 $counter = 0;
 do {
         $uid_to_delete = db_query_to_variable("SELECT wr.`uid` FROM `workunit_results` wr
@@ -17,3 +22,4 @@ do {
 } while($uid_to_delete);
 
 echo "Total: $counter\n";
+*/
