@@ -15,7 +15,7 @@ foreach($projects_array as $project) {
 
     $result = db_query("SELECT `uid`, `start_number`, `stop_number`, `result`, `is_completed` FROM `workunits`
                         WHERE `project_uid`='$project_uid_escaped' AND DATE_SUB(NOW(), INTERVAL 1 DAY) > `timestamp`
-                        ORDER BY `start_number` LIMIT 1000");
+                        ORDER BY `start_number` LIMIT 10");
     while($row = mysql_fetch_assoc($result)) {
         $uid = $row['uid'];
         $uid_escaped = db_escape($uid);
@@ -29,10 +29,12 @@ foreach($projects_array as $project) {
         $stop = $row['stop_number'];
         $result_text = $row['result'];
         $csv = "$start;$stop;$result_text;\n";
+echo "Saving...\n";
         file_put_contents("../../results/${project_uid}.txt", $csv, FILE_APPEND);
-
+echo "Deleting...\n";
         db_query("DELETE FROM `workunits` WHERE `uid` = '$uid_escaped'");
         db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` = '$uid_escaped'");
+echo "Deleting done\n";
     }
     echo "Exporting project $project_uid done\n";
 }
