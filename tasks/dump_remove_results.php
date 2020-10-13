@@ -32,8 +32,8 @@ foreach($projects_array as $project) {
         $csv = "$start;$stop;$result_text;\n";
         file_put_contents("../../results/${project_uid}.txt", $csv, FILE_APPEND);
         $uids_to_delete[] = $uid_escaped;
-        db_query("DELETE FROM `workunits` WHERE `uid` = '$uid_escaped'");
-        db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` = '$uid_escaped'");
+        //db_query("DELETE FROM `workunits` WHERE `uid` = '$uid_escaped'");
+        //db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` = '$uid_escaped'");
     }
     echo "Exporting project $project_uid done\n";
 }
