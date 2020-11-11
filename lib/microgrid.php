@@ -98,7 +98,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 	// Check is results matches, mark workunits as completed
 	if($workunit_uid!==NULL) {
 		// Decrease units in work
-		db_query("UPDATE `workunits` SET `in_progress`=`in_progress`-1 WHERE `uid`='$workunit_uid_escaped'");
+		db_query("UPDATE `workunits` SET `in_progress`=GREATEST(`in_progress` - 1, 0) WHERE `uid`='$workunit_uid_escaped'");
 		// Dec results counters
 		db_query("UPDATE `users` SET `in_process` = GREATEST(`in_process` - 1, 0) WHERE `uid`='$user_uid_escaped'");
 		// Get project uid
