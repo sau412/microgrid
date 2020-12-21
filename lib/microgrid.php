@@ -7,30 +7,35 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 
 	$project_retries=db_query_to_variable("SELECT `retries` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 
-	db_query("LOCK TABLES `workunits` WRITE,`workunit_results` WRITE,`projects` READ, `variables` WRITE, `users` WRITE");
+	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `projects` READ, `variables` WRITE, `users` WRITE");
 
 	// Workunits, that neither completed, nor calculated by that user before
-	$exists_uid=db_query_to_variable("SELECT `workunits`.`uid` FROM `workunits`
-LEFT OUTER JOIN `workunit_results` ON `workunit_results`.`workunit_uid` = `workunits`.`uid` AND `user_uid`='$user_uid_escaped'
-WHERE `project_uid`='$project_uid_escaped' AND `is_completed`=0 AND `workunit_results`.`uid` IS NULL AND `in_progress`=0
-LIMIT 1");
+	$exists_uid = db_query_to_variable("SELECT `workunits`.`uid` FROM `workunits`
+		LEFT OUTER JOIN `workunit_results`
+			ON `workunit_results`.`workunit_uid` = `workunits`.`uid` AND
+				`user_uid` = '$user_uid_escaped'
+		WHERE `project_uid` = '$project_uid_escaped' AND
+			`is_completed` = 0 AND
+			`workunit_results`.`uid` IS NULL AND
+			`in_progress` = 0
+		LIMIT 1");
 
 	if($exists_uid) {
-		$workunit_uid=$exists_uid;
+		$workunit_uid = $exists_uid;
 	} else {
-		$workunit_uid=microgrid_generate_workunit($project_uid);
+		$workunit_uid = microgrid_generate_workunit($project_uid);
 	}
 
 	$workunit_uid_escaped=db_escape($workunit_uid);
 
-	db_query("UPDATE `workunits` SET `in_progress` = `in_progress` + 1 WHERE `uid`='$workunit_uid_escaped'");
+	db_query("UPDATE `workunits` SET `in_progress` = `in_progress` + 1 WHERE `uid` = '$workunit_uid_escaped'");
 
-	db_query("INSERT INTO `workunit_results` (`workunit_uid`,`user_uid`) VALUES ('$workunit_uid_escaped','$user_uid_escaped')");
+	db_query("INSERT INTO `workunit_results` (`workunit_uid`, `user_uid`) VALUES ('$workunit_uid_escaped', '$user_uid_escaped')");
 	$workunit_result_uid=mysql_insert_id();
 
 	// Inc results counters
-	db_query("UPDATE `users` SET `total_results` = `total_results` + 1 WHERE `uid`='$user_uid_escaped'");
-	db_query("UPDATE `users` SET `in_process` = `in_process` + 1 WHERE `uid`='$user_uid_escaped'");
+	db_query("UPDATE `users` SET `total_results` = `total_results` + 1 WHERE `uid` = '$user_uid_escaped'");
+	db_query("UPDATE `users` SET `in_process` = `in_process` + 1 WHERE `uid` = '$user_uid_escaped'");
 	inc_variable("results", 1);
 
 	db_query("UNLOCK TABLES");
@@ -41,15 +46,16 @@ LIMIT 1");
 function microgrid_generate_workunit($project_uid) {
 	$project_uid_escaped=db_escape($project_uid);
 
-	db_query("LOCK TABLES `workunits` WRITE,`projects` READ, `variables` WRITE");
+	db_query("LOCK TABLES `workunits` WRITE, `projects` WRITE, `variables` WRITE");
 
-	$workunit_step=db_query_to_variable("SELECT `step` FROM `projects` WHERE `uid`='$project_uid_escaped'");
-	$workunit_max_stop=db_query_to_variable("SELECT MAX(`stop_number`) FROM `workunits` WHERE `project_uid`='$project_uid_escaped'");
+	$workunit_step = db_query_to_variable("SELECT `step` FROM `projects` WHERE `uid`='$project_uid_escaped'");
+	$workunit_max_stop = db_query_to_variable("SELECT MAX(`stop_number`) FROM `workunits` WHERE `project_uid`='$project_uid_escaped'");
 	if($workunit_max_stop === NULL) {
-		$workunit_max_stop=db_query_to_variable("SELECT `start_number` FROM `projects` WHERE `uid`='$project_uid_escaped'");
+		$workunit_max_stop = db_query_to_variable("SELECT `start_number` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 	}
-	$start_number=$workunit_max_stop+1;
-	$stop_number=$workunit_max_stop+1+$workunit_step;
+	db_query("UPDATE `projects` SET `max_stop_number` = '$workunit_max_stop' WHERE `uid`='$project_uid_escaped'");
+	$start_number = $workunit_max_stop + 1;
+	$stop_number = $workunit_max_stop + 1 + $workunit_step;
 	db_query("INSERT INTO `workunits` (`project_uid`,`start_number`,`stop_number`)
 				VALUES ('$project_uid_escaped','$start_number','$stop_number')");
 	$uid = mysql_insert_id();
@@ -85,7 +91,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 		FROM `workunits` WHERE `uid`='$workunit_uid_escaped' AND `is_completed`=0");
 	$project_uid_escaped=db_escape($project_uid);
 	$actual_version=microgrid_get_actual_version($project_uid);
-	if($version<$actual_version) {
+	if($version < $actual_version) {
 		return array("result"=>"fail", "message"=>"Incorrect module version, refresh page and start again");
 	}
 
