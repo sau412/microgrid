@@ -48,16 +48,17 @@ function microgrid_generate_workunit($project_uid) {
 
 	db_query("LOCK TABLES `workunits` WRITE, `projects` WRITE, `variables` WRITE");
 
-	$workunit_step = db_query_to_variable("SELECT `step` FROM `projects` WHERE `uid`='$project_uid_escaped'");
-	$workunit_max_stop = db_query_to_variable("SELECT MAX(`stop_number`) FROM `workunits` WHERE `project_uid`='$project_uid_escaped'");
+	$workunit_step = db_query_to_variable("SELECT `step` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
+	//$workunit_max_stop = db_query_to_variable("SELECT MAX(`stop_number`) FROM `workunits` WHERE `project_uid`='$project_uid_escaped'");
+	$workunit_max_stop = db_query_to_variable("SELECT `max_stop_number` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	if($workunit_max_stop === NULL) {
-		$workunit_max_stop = db_query_to_variable("SELECT `start_number` FROM `projects` WHERE `uid`='$project_uid_escaped'");
+		$workunit_max_stop = db_query_to_variable("SELECT `start_number` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	}
-	db_query("UPDATE `projects` SET `max_stop_number` = '$workunit_max_stop' WHERE `uid`='$project_uid_escaped'");
+	db_query("UPDATE `projects` SET `max_stop_number` = '$workunit_max_stop' WHERE `uid` = '$project_uid_escaped'");
 	$start_number = $workunit_max_stop + 1;
 	$stop_number = $workunit_max_stop + 1 + $workunit_step;
-	db_query("INSERT INTO `workunits` (`project_uid`,`start_number`,`stop_number`)
-				VALUES ('$project_uid_escaped','$start_number','$stop_number')");
+	db_query("INSERT INTO `workunits` (`project_uid`, `start_number`, `stop_number`)
+				VALUES ('$project_uid_escaped', '$start_number', '$stop_number')");
 	$uid = mysql_insert_id();
 
 	inc_variable("workunits", 1);
