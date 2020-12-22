@@ -56,6 +56,8 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 }
 
 function microgrid_generate_workunit($project_uid) {
+
+	log_write("Generating new workunits for project $project_uid");
 	$project_uid_escaped=db_escape($project_uid);
 
 	db_query("LOCK TABLES `workunits` WRITE, `projects` WRITE, `variables` WRITE");
@@ -147,6 +149,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 				if($reward_amount == 0) $reward_amount = 0;
 				$reward_amount_escaped = db_escape($reward_amount);
 
+				log_write("Workunit $workunit_uid project $project_uid is completed");
 				db_query("UPDATE `workunits` SET `in_progress`=0,`is_completed`=1,`result`='$result_escaped' WHERE `uid`='$workunit_uid_escaped'");
 				// Get user uids
 				$results_array = db_query_to_array("SELECT `uid`, `user_uid`, `result_hash` FROM `workunit_results`
