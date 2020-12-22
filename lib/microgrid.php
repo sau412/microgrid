@@ -80,6 +80,7 @@ function microgrid_generate_workunit($project_uid) {
 		db_query("INSERT INTO `workunits` (`project_uid`, `start_number`, `stop_number`)
 			VALUES ('$project_uid_escaped', '$start_number', '$stop_number')");
 		$new_tasks_cache = mysql_insert_id();
+		inc_variable("workunits");
 	}
 
 	$new_tasks_cache_json = json_encode($new_tasks_cache);
