@@ -11,6 +11,7 @@ require_once("../lib/core.php");
 db_connect();
 
 $workunits_in_progress_array = db_query_to_array("SELECT `uid` FROM `workunits` WHERE `in_progress` <> 0");
+$workunit_max_interval = "1 HOUR";
 
 foreach($workunits_in_progress_array as $row) {
 	$workunit_uid = $row['uid'];
