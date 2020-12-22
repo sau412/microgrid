@@ -491,11 +491,22 @@ function run_next_worker(worker_id, project_id, myWorker) {
 		status = 'working';
 		progress = '0';
 		worker_set_status_and_progress(worker_id, status, progress);
-		task_data = JSON.parse(result);
-		var start_number = task_data.start_number;
-		var stop_number = task_data.stop_number;
-		var workunit_result_uid = task_data.workunit_result_uid;
-		myWorker.postMessage([worker_id, workunit_result_uid, start_number, stop_number]);
+		try {
+			task_data = JSON.parse(result);
+			var start_number = task_data.start_number;
+			var stop_number = task_data.stop_number;
+			var workunit_result_uid = task_data.workunit_result_uid;
+			myWorker.postMessage([worker_id, workunit_result_uid, start_number, stop_number]);
+		}
+		catch (e) {
+			status = "downloading repeat";
+			progress = "0";
+			worker_set_status_and_progress(worker_id, status, progress);
+			// Repeat after minute
+			setTimeout(function() {
+				run_next_worker(worker_id, project_id, myWorker);
+			}, 60000);
+		}
 	})
 	.fail(function() {
 		status = "downloading repeat";
@@ -510,8 +521,12 @@ function run_next_worker(worker_id, project_id, myWorker) {
 			action: "get_balance",
 			token: "$token"
 		}, function(result) {
-		balance_data = JSON.parse(result);
-		document.getElementById("balance").innerHTML = balance_data.balance;
+		try {
+			balance_data = JSON.parse(result);
+			document.getElementById("balance").innerHTML = balance_data.balance;
+		}
+		catch(e) {
+		}
 	});
 }
 
