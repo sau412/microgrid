@@ -106,7 +106,7 @@ WHERE wr.`uid`='$workunit_result_uid_escaped'");
 	return $result;
 }
 
-function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$version,$result) {
+function microgrid_save_workunit_results($user_uid, $workunit_results_uid, $version, $result) {
 	$user_uid_escaped=db_escape($user_uid);
 	$workunit_result_uid_escaped=db_escape($workunit_results_uid);
 	$result_hash=hash("sha256",$result);
@@ -124,7 +124,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 		return array("result"=>"fail", "message"=>"Incorrect module version, refresh page and start again");
 	}
 
-	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `users` WRITE, `projects` READ, `variables` WRITE");
+	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `users` WRITE, `projects` WRITE, `variables` WRITE");
 
 	// Update workunit_result for specific user
 	db_query("UPDATE `workunit_results` SET `result_hash`='$result_hash_escaped',`completed`=NOW() WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
