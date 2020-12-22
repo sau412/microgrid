@@ -555,13 +555,13 @@ function worker_store_result(worker_id, project_id, myWorker, workunit_version, 
 					worker_set_status_and_progress(worker_id, status, progress);
 				}
 			}
+			else {
+				// Show error
+				document.getElementById("status_" + worker_id).innerHTML = reply_json.message;
+			}
 		}
 		catch(e) {
 			console.log("JSON parse error in worker_store_result");
-		}
-		else {
-			// Show error
-			document.getElementById("status_" + worker_id).innerHTML = reply_json.message;
 		}
 	})
 	.fail(function() {
