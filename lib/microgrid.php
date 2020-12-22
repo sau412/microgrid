@@ -9,16 +9,28 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 
 	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `projects` READ, `variables` WRITE, `users` WRITE");
 
-	// Workunits, that neither completed, nor calculated by that user before
-	$exists_uid = db_query_to_variable("SELECT `workunits`.`uid` FROM `workunits`
-		LEFT OUTER JOIN `workunit_results`
-			ON `workunit_results`.`workunit_uid` = `workunits`.`uid` AND
-				`user_uid` = '$user_uid_escaped'
-		WHERE `project_uid` = '$project_uid_escaped' AND
-			`is_completed` = 0 AND
-			`workunit_results`.`uid` IS NULL AND
-			`in_progress` = 0
-		LIMIT 1");
+	// Check workunits cache
+	$workunits_cache_json = db_query_to_variable("SELECT `new_tasks_cache` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
+	$workunits_cache = json_decode($workunits_cache_json, true);
+	if(is_array($workunits_cache) && count($workunits_cache) >= 1) {
+		$exists_uid = array_shift($workunits_cache);
+		$new_tasks_cache_json = json_encode($workunits_cache);
+		$new_tasks_cache_json_escaped = db_escape($new_tasks_cache_json);
+		db_query("UPDATE `projects` SET `new_tasks_cache` = '$new_tasks_cache_json_escaped'
+					WHERE `uid` = '$project_uid_escaped'");
+	}
+	else {
+		// Workunits, that neither completed, nor calculated by that user before
+		$exists_uid = db_query_to_variable("SELECT `workunits`.`uid` FROM `workunits`
+			LEFT OUTER JOIN `workunit_results`
+				ON `workunit_results`.`workunit_uid` = `workunits`.`uid` AND
+					`user_uid` = '$user_uid_escaped'
+			WHERE `project_uid` = '$project_uid_escaped' AND
+				`is_completed` = 0 AND
+				`workunit_results`.`uid` IS NULL AND
+				`in_progress` = 0
+			LIMIT 1");
+	}
 
 	if($exists_uid) {
 		$workunit_uid = $exists_uid;
@@ -59,10 +71,21 @@ function microgrid_generate_workunit($project_uid) {
 	db_query("INSERT INTO `workunits` (`project_uid`, `start_number`, `stop_number`)
 				VALUES ('$project_uid_escaped', '$start_number', '$stop_number')");
 	$uid = mysql_insert_id();
-
-	db_query("UPDATE `projects` SET `max_stop_number` = '$stop_number' WHERE `uid` = '$project_uid_escaped'");
-
 	inc_variable("workunits");
+
+	$new_tasks_cache = [];
+	for($i = 0; $i != 16; $i ++) {
+		$start_number = $stop_number + 1;
+		$stop_number = $stop_number + 1 + $workunit_step;
+		db_query("INSERT INTO `workunits` (`project_uid`, `start_number`, `stop_number`)
+			VALUES ('$project_uid_escaped', '$start_number', '$stop_number')");
+		$new_tasks_cache = mysql_insert_id();
+	}
+
+	$new_tasks_cache_json = json_encode($new_tasks_cache);
+	$new_tasks_cache_json_escaped = db_escape($new_tasks_cache_json);
+	db_query("UPDATE `projects` SET `new_tasks_cache` = '$new_tasks_cache_json_escaped' WHERE `uid` = '$project_uid_escaped'");
+	db_query("UPDATE `projects` SET `max_stop_number` = '$stop_number' WHERE `uid` = '$project_uid_escaped'");
 
 	db_query("UNLOCK TABLES");
 
