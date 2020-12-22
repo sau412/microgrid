@@ -7,7 +7,7 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 
 	$project_retries=db_query_to_variable("SELECT `retries` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 
-	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `projects` READ, `variables` WRITE, `users` WRITE");
+	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `projects` WRITE, `variables` WRITE, `users` WRITE");
 
 	// Check workunits cache
 	$workunits_cache_json = db_query_to_variable("SELECT `new_tasks_cache` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
