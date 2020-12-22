@@ -554,8 +554,9 @@ function worker_store_result(worker_id, project_id, myWorker, workunit_version, 
 					progress = "100";
 					worker_set_status_and_progress(worker_id, status, progress);
 				}
+			}
 		}
-		catch (e) {
+		catch(e) {
 			console.log("JSON parse error in worker_store_result");
 		}
 		else {
