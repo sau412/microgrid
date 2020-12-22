@@ -499,6 +499,7 @@ function run_next_worker(worker_id, project_id, myWorker) {
 			myWorker.postMessage([worker_id, workunit_result_uid, start_number, stop_number]);
 		}
 		catch (e) {
+			console.log("JSON parse error in run_next_worker");
 			status = "downloading repeat";
 			progress = "0";
 			worker_set_status_and_progress(worker_id, status, progress);
@@ -526,6 +527,7 @@ function run_next_worker(worker_id, project_id, myWorker) {
 			document.getElementById("balance").innerHTML = balance_data.balance;
 		}
 		catch(e) {
+			console.log("JSON parse error in run_next_worker");
 		}
 	});
 }
@@ -540,17 +542,21 @@ function worker_store_result(worker_id, project_id, myWorker, workunit_version, 
 		result: workunit_result
 	};
 	$.post("./", data, function (reply) {
-		reply_json = JSON.parse(reply);
-		if(reply_json.result == "ok") {
-			// Run next worker if not in pause mode
-			if(auto_load_next_enabled === 1) {
-				run_next_worker(worker_id, project_id, myWorker);
-			}
-			else {
-				status = "completed";
-				progress = "100";
-				worker_set_status_and_progress(worker_id, status, progress);
-			}
+		try {
+			reply_json = JSON.parse(reply);
+			if(reply_json.result == "ok") {
+				// Run next worker if not in pause mode
+				if(auto_load_next_enabled === 1) {
+					run_next_worker(worker_id, project_id, myWorker);
+				}
+				else {
+					status = "completed";
+					progress = "100";
+					worker_set_status_and_progress(worker_id, status, progress);
+				}
+		}
+		catch (e) {
+			console.log("JSON parse error in worker_store_result");
 		}
 		else {
 			// Show error
