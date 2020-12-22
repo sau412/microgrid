@@ -44,12 +44,9 @@ function set_variable($name,$value) {
 }
 
 // Increase variable counter
-function inc_variable($name, $delta) {
-	//db_query("LOCK TABLES `variables` WRITE");
-	$value = get_variable($name);
-	if(!$value) $value = 0;
-	set_variable($name, $value + $delta);
-	//db_query("UNLOCK TABLES");
+function inc_variable($name) {
+	$name_escaped = db_escape($name);
+	db_query("UPDATE `variables` SET `value` = `value` + 1 WHERE `name` = '$name_escaped'");
 }
 
 // Create or get session

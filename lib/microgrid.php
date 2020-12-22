@@ -36,7 +36,7 @@ function microgrid_generate_workunit_task($project_uid,$user_uid) {
 	// Inc results counters
 	db_query("UPDATE `users` SET `total_results` = `total_results` + 1 WHERE `uid` = '$user_uid_escaped'");
 	db_query("UPDATE `users` SET `in_process` = `in_process` + 1 WHERE `uid` = '$user_uid_escaped'");
-	inc_variable("results", 1);
+	inc_variable("results");
 
 	db_query("UNLOCK TABLES");
 
@@ -54,14 +54,15 @@ function microgrid_generate_workunit($project_uid) {
 	if($workunit_max_stop === NULL) {
 		$workunit_max_stop = db_query_to_variable("SELECT `start_number` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	}
-	db_query("UPDATE `projects` SET `max_stop_number` = '$workunit_max_stop' WHERE `uid` = '$project_uid_escaped'");
 	$start_number = $workunit_max_stop + 1;
 	$stop_number = $workunit_max_stop + 1 + $workunit_step;
 	db_query("INSERT INTO `workunits` (`project_uid`, `start_number`, `stop_number`)
 				VALUES ('$project_uid_escaped', '$start_number', '$stop_number')");
 	$uid = mysql_insert_id();
 
-	inc_variable("workunits", 1);
+	db_query("UPDATE `projects` SET `max_stop_number` = '$stop_number' WHERE `uid` = '$project_uid_escaped'");
+
+	inc_variable("workunits");
 
 	db_query("UNLOCK TABLES");
 
@@ -100,7 +101,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 
 	// Update workunit_result for specific user
 	db_query("UPDATE `workunit_results` SET `result_hash`='$result_hash_escaped',`completed`=NOW() WHERE `uid`='$workunit_result_uid_escaped' AND `user_uid`='$user_uid_escaped'");
-	inc_variable("results_complete", 1);
+	inc_variable("results_complete");
 
 	// Check is results matches, mark workunits as completed
 	if($workunit_uid!==NULL) {
@@ -155,7 +156,7 @@ function microgrid_save_workunit_results($user_uid,$workunit_results_uid,$versio
 							WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");*/
 				//db_query("UPDATE `workunit_results` SET `is_valid`=1,`reward`='$reward_amount_escaped' WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`='$result_hash'");
 				//db_query("UPDATE `workunit_results` SET `is_valid`=0,`reward`=0 WHERE `workunit_uid`='$workunit_uid_escaped' AND `result_hash`<>'$result_hash'");
-				inc_variable("workunits_complete", 1);
+				inc_variable("workunits_complete");
 			}
 		}
 	}
