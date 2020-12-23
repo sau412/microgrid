@@ -22,7 +22,7 @@ function microgrid_generate_workunit_task($project_uid, $user_uid) {
 	// Check workunits cache
 	$workunits_cache_json = db_query_to_variable("SELECT `new_tasks_cache` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	$workunits_cache = json_decode($workunits_cache_json, true);
-	if(is_array($workunits_cache) && count($workunits_cache) >= 1) {
+	if(false && is_array($workunits_cache) && count($workunits_cache) >= 1) {
 		$exists_uid = array_shift($workunits_cache);
 		$workunits_cache_json = json_encode($workunits_cache);
 		$workunits_cache_json_escaped = db_escape($workunits_cache_json);
