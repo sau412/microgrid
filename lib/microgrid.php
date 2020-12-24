@@ -15,12 +15,15 @@ function microgrid_generate_workunit_task($project_uid, $user_uid) {
 	$project_uid_escaped = db_escape($project_uid);
 	$user_uid_escaped = db_escape($user_uid);
 
-	$project_retries = db_query_to_variable("SELECT `retries` FROM `projects` WHERE `uid`='$project_uid_escaped'");
-
-	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `projects` WRITE, `variables` WRITE, `users` WRITE");
+	$workunit_generated = false;
+	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `projects` READ");
+	$project_data_array = db_query_to_array("SELECT * FROM `projects` WHERE `uid`='$project_uid_escaped'");
+	$project_data = array_pop($project_data_array);
+	$project_retries = $project_data['retries'];
+	//db_query_to_variable("SELECT `retries` FROM `projects` WHERE `uid`='$project_uid_escaped'");
 
 	// Check workunits cache
-	$workunits_cache_json = db_query_to_variable("SELECT `new_tasks_cache` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
+	/*$workunits_cache_json = db_query_to_variable("SELECT `new_tasks_cache` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	$workunits_cache = json_decode($workunits_cache_json, true);
 	if(false && is_array($workunits_cache) && count($workunits_cache) >= 1) {
 		$exists_uid = array_shift($workunits_cache);
@@ -29,7 +32,7 @@ function microgrid_generate_workunit_task($project_uid, $user_uid) {
 		db_query("UPDATE `projects` SET `new_tasks_cache` = '$workunits_cache_json_escaped'
 					WHERE `uid` = '$project_uid_escaped'");
 	}
-	else {
+	else */ //{
 		// Workunits, that neither completed, nor calculated by that user before
 		$exists_uid = db_query_to_variable("SELECT `workunits`.`uid` FROM `workunits`
 			LEFT OUTER JOIN `workunit_results`
@@ -40,28 +43,29 @@ function microgrid_generate_workunit_task($project_uid, $user_uid) {
 				`workunit_results`.`uid` IS NULL AND
 				`in_progress` = 0
 			LIMIT 1");
-	}
+	//}
 
 	if($exists_uid) {
 		$workunit_uid = $exists_uid;
 	} else {
-		$workunit_uid = microgrid_generate_workunit($project_uid);
+		$workunit_uid = microgrid_generate_workunit($project_data);
+		$workunit_generated = true;
 	}
 
-	$workunit_uid_escaped=db_escape($workunit_uid);
+	$workunit_uid_escaped = db_escape($workunit_uid);
 
 	db_query("UPDATE `workunits` SET `in_progress` = `in_progress` + 1 WHERE `uid` = '$workunit_uid_escaped'");
 
 	db_query("INSERT INTO `workunit_results` (`workunit_uid`, `user_uid`) VALUES ('$workunit_uid_escaped', '$user_uid_escaped')");
-	$workunit_result_uid=mysql_insert_id();
-
-	// Inc results counters
-	db_query("UPDATE `users` SET `total_results` = `total_results` + 1 WHERE `uid` = '$user_uid_escaped'");
-	db_query("UPDATE `users` SET `in_process` = `in_process` + 1 WHERE `uid` = '$user_uid_escaped'");
-	inc_variable("results");
+	$workunit_result_uid = mysql_insert_id();
 
 	db_query("UNLOCK TABLES");
 
+	// Inc results counters
+	inc_variable("results");
+	db_query("UPDATE `users` SET `total_results` = `total_results` + 1 WHERE `uid` = '$user_uid_escaped'");
+	db_query("UPDATE `users` SET `in_process` = `in_process` + 1 WHERE `uid` = '$user_uid_escaped'");
+	if($workunit_generated) inc_variable("workunits");
 	return $workunit_result_uid;
 }
 
@@ -72,26 +76,29 @@ function microgrid_generate_workunit_task($project_uid, $user_uid) {
  * 
  * @return int workunit_uid
  */
-function microgrid_generate_workunit($project_uid) {
+function microgrid_generate_workunit($project_data) {
+	$project_uid = $project_data['uid'];
 
 	log_write("Generating new workunits for project $project_uid");
-	$project_uid_escaped=db_escape($project_uid);
+	$project_uid_escaped = db_escape($project_uid);
 
-	db_query("LOCK TABLES `workunits` WRITE, `projects` WRITE, `variables` WRITE");
+	//db_query("LOCK TABLES `workunits` WRITE, `variables` WRITE");
 
-	$workunit_step = db_query_to_variable("SELECT `step` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
+	$workunit_step = $project_data['step'];
+	//db_query_to_variable("SELECT `step` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	//$workunit_max_stop = db_query_to_variable("SELECT MAX(`stop_number`) FROM `workunits` WHERE `project_uid`='$project_uid_escaped'");
-	$workunit_max_stop = db_query_to_variable("SELECT `max_stop_number` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
+	$workunit_max_stop = $project_data['max_stop_number'];
+	//db_query_to_variable("SELECT `max_stop_number` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	if($workunit_max_stop === NULL) {
-		$workunit_max_stop = db_query_to_variable("SELECT `start_number` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
+		$workunit_max_stop = $project_data['start_number'];
+		//db_query_to_variable("SELECT `start_number` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	}
 	$start_number = $workunit_max_stop + 1;
 	$stop_number = $workunit_max_stop + 1 + $workunit_step;
 	db_query("INSERT INTO `workunits` (`project_uid`, `start_number`, `stop_number`)
 				VALUES ('$project_uid_escaped', '$start_number', '$stop_number')");
 	$uid = mysql_insert_id();
-	inc_variable("workunits");
-
+/*
 	$workunits_cache_json = db_query_to_variable("SELECT `new_tasks_cache` FROM `projects` WHERE `uid` = '$project_uid_escaped'");
 	$workunits_cache = json_decode($workunits_cache_json, true);
 	if(!$workunits_cache) {
@@ -111,8 +118,8 @@ function microgrid_generate_workunit($project_uid) {
 	log_write("New tasks cache: $workunits_cache_json");
 	db_query("UPDATE `projects` SET `new_tasks_cache` = '$workunits_cache_json_escaped' WHERE `uid` = '$project_uid_escaped'");
 	db_query("UPDATE `projects` SET `max_stop_number` = '$stop_number' WHERE `uid` = '$project_uid_escaped'");
-
-	db_query("UNLOCK TABLES");
+*/
+	//db_query("UNLOCK TABLES");
 
 	return $uid;
 }
