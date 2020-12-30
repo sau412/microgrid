@@ -5,7 +5,7 @@ require_once("../lib/db.php");
 
 db_connect();
 
-$projects_array = db_query_to_array("SELECT `uid` FROM `projects`");
+$projects_array = db_query_to_array("SELECT `uid` FROM `projects` WHERE `is_enabled` = 1");
 
 foreach($projects_array as $project) {
     $project_uid = $project['uid'];
