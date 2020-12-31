@@ -16,6 +16,7 @@ function microgrid_generate_workunit_task($project_uid, $user_uid) {
 	$user_uid_escaped = db_escape($user_uid);
 
 	$workunit_generated = false;
+	ignore_user_abort(true);
 	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `projects` READ");
 	$project_data_array = db_query_to_array("SELECT * FROM `projects` WHERE `uid`='$project_uid_escaped'");
 	$project_data = array_pop($project_data_array);
@@ -169,6 +170,7 @@ function microgrid_save_workunit_results($user_uid, $workunit_results_uid, $vers
 		return array("result"=>"fail", "message"=>"Incorrect module version, refresh page and start again");
 	}
 
+	ignore_user_abort(true);
 	db_query("LOCK TABLES `workunits` WRITE, `workunit_results` WRITE, `users` WRITE, `projects` WRITE, `variables` WRITE");
 
 	// Update workunit_result for specific user
