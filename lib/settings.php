@@ -31,4 +31,3 @@ $grc_api_key="";
 
 // Workunits settings
 $workunit_max_interval="1 DAY";
-?>

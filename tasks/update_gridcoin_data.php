@@ -45,12 +45,12 @@ foreach($payout_data_array as $payout_data) {
 			switch($tx_data->status) {
 				case 'address error':
 					echo "Address error wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC\n";
-					//write_log("Address error wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC");
+					log_write("Address error wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC", 5);
 					db_query("UPDATE `payouts` SET `tx_id`='address error',`status`='error' WHERE `uid`='$uid_escaped'");
 					break;
 				case 'sending error':
 					echo "Sending error wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC\n";
-					//write_log("Sending error wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC");
+					log_write("Sending error wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC", 5);
 					db_query("UPDATE `payouts` SET `tx_id`='sending error',`status`='error' WHERE `uid`='$uid_escaped'");
 					break;
 				case 'received':
@@ -58,7 +58,7 @@ foreach($payout_data_array as $payout_data) {
 				case 'sent':
 					$tx_id=$tx_data->tx_id;
 					$tx_id_escaped=db_escape($tx_id);
-					//write_log("Sent wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC");
+					log_write("Sent wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC");
 					echo "Sent wallet uid '$wallet_uid' for address '$address' amount '$amount' GRC\n";
 					db_query("UPDATE `payouts` SET `tx_id`='$tx_id_escaped',`status`='sent' WHERE `uid`='$uid_escaped'");
 					break;
@@ -73,13 +73,13 @@ foreach($payout_data_array as $payout_data) {
 		if($wallet_uid && is_numeric($wallet_uid)) {
 			db_query("UPDATE `payouts` SET `status`='processing',`wallet_uid`='$wallet_uid_escaped' WHERE `uid`='$uid_escaped'");
 		} else {
-			write_log("Sending error, no wallet uid for address '$address' amount '$amount' GRC");
+			log_write("Sending error, no wallet uid for address '$address' amount '$amount' GRC", 5);
 		}
 		echo "----\n";
 	} else {
 		// No funds
 		echo "Insufficient funds for sending rewards\n";
-		write_log("Insufficient funds for sending rewards");
+		log_write("Insufficient funds for sending rewards", 4);
 		break;
 	}
 }
@@ -87,5 +87,3 @@ foreach($payout_data_array as $payout_data) {
 // Update balance after all
 $current_balance=grc_web_get_balance();
 set_variable("wallet_balance",$current_balance);
-
-?>
