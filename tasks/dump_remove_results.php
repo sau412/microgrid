@@ -56,7 +56,10 @@ foreach($projects_array as $project) {
         db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` IN ('$uids_to_delete_string_escaped')");
 
         // Break if less than 1000 rows
-        if($row_count < 1000) break;
+        if($row_count < 1000) {
+            echo "Less than 1000 results, break\n";
+            break;
+        }
     }
     echo "Exporting project $project_uid done\n";
 }
