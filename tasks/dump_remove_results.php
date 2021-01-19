@@ -26,6 +26,7 @@ foreach($projects_array as $project) {
         $result = db_query("SELECT `uid`, `start_number`, `stop_number`, `result`, `is_completed` FROM `workunits`
                             WHERE `project_uid`='$project_uid_escaped' AND DATE_SUB(NOW(), INTERVAL 1 DAY) > `timestamp`
                             ORDER BY `start_number` LIMIT 1000");
+        $row_count = 0;
         while($row = mysql_fetch_assoc($result)) {
             $uid = $row['uid'];
             $uid_escaped = db_escape($uid);
@@ -43,6 +44,7 @@ foreach($projects_array as $project) {
             $uids_to_delete[] = $uid_escaped;
             //db_query("DELETE FROM `workunits` WHERE `uid` = '$uid_escaped'");
             //db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` = '$uid_escaped'");
+            $row_count ++;
         }
 
         $uids_to_delete_string_escaped = implode("','", $uids_to_delete);
@@ -52,6 +54,9 @@ foreach($projects_array as $project) {
         
         echo "Deleting results...\n";
         db_query("DELETE FROM `workunit_results` WHERE `workunit_uid` IN ('$uids_to_delete_string_escaped')");
+
+        // Break if less than 1000 rows
+        if($row_count < 1000) break;
     }
     echo "Exporting project $project_uid done\n";
 }
