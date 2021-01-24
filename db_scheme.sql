@@ -21,11 +21,13 @@ CREATE TABLE `payouts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `projects` (
-  `uid` int(11) NOT NULL,
+  `uid` tinyint(11) NOT NULL,
   `name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `is_enabled` int(11) NOT NULL DEFAULT '1',
   `start_number` bigint(20) NOT NULL,
   `stop_number` bigint(20) NOT NULL,
+  `max_stop_number` bigint(20) NOT NULL DEFAULT '0',
+  `new_tasks_cache` text COLLATE utf8_unicode_ci NOT NULL,
   `step` bigint(20) NOT NULL,
   `retries` int(11) NOT NULL,
   `workunit_price` decimal(16,8) NOT NULL,
@@ -71,20 +73,35 @@ CREATE TABLE `variables` (
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+INSERT INTO `variables` (`uid`, `name`, `value`, `timestamp`) VALUES
+(1, 'login_enabled', '1', '2021-01-24 00:00:00'),
+(2, 'payouts_enabled', '1', '2021-01-24 00:00:00'),
+(3, 'info', '', '2021-01-24 00:00:00'),
+(4, 'global_message', '', '2021-01-24 00:00:00'),
+(6, 'wallet_balance', '0', '2021-01-24 00:00:00'),
+(7, 'rating_cache', '[]', '2021-01-24 00:00:00'),
+(8, 'users', '0', '2021-01-24 00:00:00'),
+(9, 'active_users', '0', '2021-01-24 00:00:00'),
+(10, 'workunits', '0', '2021-01-24 00:00:00'),
+(11, 'results', '0', '2021-01-24 00:00:00'),
+(12, 'workunits_complete', '0', '2021-01-24 00:00:00'),
+(13, 'results_complete', '0', '2021-01-24 00:00:00'),
+(14, 'users_balance', '0', '2021-01-24 00:00:00');
+
 CREATE TABLE `workunits` (
-  `uid` int(11) NOT NULL,
-  `project_uid` int(11) NOT NULL,
+  `uid` bigint(20) NOT NULL,
+  `project_uid` tinyint(11) NOT NULL,
   `start_number` bigint(20) NOT NULL,
   `stop_number` bigint(20) NOT NULL,
-  `in_progress` int(11) NOT NULL DEFAULT '0',
-  `is_completed` int(11) NOT NULL DEFAULT '0',
+  `in_progress` tinyint(4) NOT NULL DEFAULT '0',
+  `is_completed` tinyint(4) NOT NULL DEFAULT '0',
   `result` longtext COLLATE utf8_unicode_ci,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `workunit_results` (
-  `uid` int(11) NOT NULL,
-  `workunit_uid` int(11) NOT NULL,
+  `uid` bigint(20) NOT NULL,
+  `workunit_uid` bigint(20) NOT NULL,
   `user_uid` int(11) NOT NULL,
   `is_valid` tinyint(4) DEFAULT NULL,
   `reward` decimal(16,8) DEFAULT NULL,
@@ -121,9 +138,9 @@ ALTER TABLE `variables`
 
 ALTER TABLE `workunits`
   ADD PRIMARY KEY (`uid`),
-  ADD KEY `is_completed` (`is_completed`),
   ADD KEY `project_uid` (`project_uid`,`stop_number`) USING BTREE,
-  ADD KEY `start_number` (`start_number`);
+  ADD KEY `start_number` (`start_number`),
+  ADD KEY `is_completed` (`is_completed`,`in_progress`,`project_uid`) USING BTREE;
 
 ALTER TABLE `workunit_results`
   ADD PRIMARY KEY (`uid`),
@@ -138,7 +155,7 @@ ALTER TABLE `log`
 ALTER TABLE `payouts`
   MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `projects`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `uid` tinyint(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `sessions`
   MODIFY `uid` bigint(20) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `users`
@@ -146,6 +163,6 @@ ALTER TABLE `users`
 ALTER TABLE `variables`
   MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `workunits`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `uid` bigint(20) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `workunit_results`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `uid` bigint(20) NOT NULL AUTO_INCREMENT;
