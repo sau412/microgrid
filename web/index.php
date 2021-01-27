@@ -66,13 +66,13 @@ if(isset($action)) {
 		$result['balance'] = get_user_balance($user_uid);
 		echo json_encode($result);
 		die();
-	} else if($action=='get_new_task') {
+	} else if($user_uid && $action=='get_new_task') {
 		$project_uid=stripslashes($_POST['project']);
 		$workunit_result_uid=microgrid_generate_workunit_task($project_uid,$user_uid);
 		$workunit_data=microgrid_get_workunit_data_by_workunit_result_uid($workunit_result_uid);
 		echo json_encode($workunit_data);
 		die();
-	} else if($action=='task_store_result') {
+	} else if($user_uid && $action=='task_store_result') {
 		$result=stripslashes($_POST['result']);
 		$version=stripslashes($_POST['version']);
 		$workunit_result_uid=stripslashes($_POST['workunit_result_uid']);
@@ -80,7 +80,7 @@ if(isset($action)) {
 		echo json_encode($save_result);
 		users_update_active_time($user_uid);
 		die();
-	} else if($action=='user_change_settings') {
+	} else if($user_uid && $action=='user_change_settings') {
 		$mail=stripslashes($_POST['mail']);
 		$withdraw_address=stripslashes($_POST['withdraw_address']);
 		$password=stripslashes($_POST['password']);
@@ -88,7 +88,7 @@ if(isset($action)) {
 		$new_password2=stripslashes($_POST['new_password2']);
 
 		$message=user_change_settings($user_uid,$mail,$withdraw_address,$password,$new_password1,$new_password2);
-	} else if($action=='admin_change_settings' && is_admin($user_uid)) {
+	} else if($user_uid && $action=='admin_change_settings' && is_admin($user_uid)) {
 		$login_enabled=stripslashes($_POST['login_enabled']);
 		$payouts_enabled=stripslashes($_POST['payouts_enabled']);
 		$info=stripslashes($_POST['info']);
