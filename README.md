@@ -1,5 +1,5 @@
 # Microgrid
-Grid computing with cryptocurrency rewards. Gridcoin by default.
+Grid computing with or without cryptocurrency rewards. Current implementation is crypto-free.
 
 ## Requirements
 * MySQL
