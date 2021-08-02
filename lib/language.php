@@ -623,5 +623,3 @@ function lang_parser($text) {
         }
         return $text;
 }
-
-?>

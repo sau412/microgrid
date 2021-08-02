@@ -76,4 +76,3 @@ function email_send_all() {
 		email_set_status($email_uid,$status);
 	}
 }
-?>

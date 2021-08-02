@@ -16,4 +16,3 @@ $wallet_balance = get_variable('wallet_balance');
 $users_balance = get_variable('users_balance');
 
 echo "users:$users active_users:$active_users workunits:$workunits workunits_complete:$workunits_complete results:$results results_complete:$results_complete wallet_balance:$wallet_balance users_balance:$users_balance\n";
-?>
