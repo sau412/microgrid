@@ -30,7 +30,7 @@ function html_page_end() {
 
 	$result=<<<_END
 <hr width=10%>
-<p>Opensource Gridcoin distribute computing project (<a href='https://github.com/sau412/microgrid'>github</a>) by <a href='https://arikado.xyz/'>sau412</a>.</p>
+<p>Opensource distribute computing project (<a href='https://github.com/sau412/microgrid'>github</a>) by <a href='https://arikado.xyz/'>sau412</a>.</p>
 <p><img src='https://arikado.xyz/counter/?site=$project_counter_name'></p>
 </center>
 <script>
@@ -70,11 +70,10 @@ _END;
 }
 
 function html_logout_form($user_uid,$token) {
-	global $currency_short;
 	$username=get_username_by_uid($user_uid);
 	$balance=get_user_balance($user_uid);
 	$result=<<<_END
-<p>Welcome, $username (<a href='?action=logout&token=$token'>logout</a>), your balance: <span id='balance'>$balance</span> $currency_short</p>
+<p>Welcome, $username (<a href='?action=logout&token=$token'>logout</a>)</p>
 
 _END;
 	return lang_parser($result);
@@ -102,16 +101,14 @@ _END;
 }
 
 function html_tabs($user_uid) {
-	global $currency_short;
 	$result="";
 	$result.="<div id=tabs style='display: inline-block;'>\n";
 	$result.="<ul class=horizontal_menu>\n";
 	if($user_uid) {
 		$result.=html_menu_element("info","Info");
-		$result.=html_menu_element("comp","Compute for $currency_short");
+		$result.=html_menu_element("comp","Compute");
 		$result.=html_menu_element("stats","User stats");
 		$result.=html_menu_element("rating","Rating");
-		$result.=html_menu_element("payouts","Payouts");
 		$result.=html_menu_element("settings","Settings");
 		if(is_admin($user_uid)) {
 			$result.=html_menu_element("control","Control");
@@ -299,81 +296,8 @@ _END;
 	return $result;
 }
 
-// Send and receive
-function html_send_receive($user_uid,$token) {
-	global $currency_short;
-	$result="";
-
-	$deposit_address=get_user_deposit_address($user_uid);
-	$withdraw_address=get_user_withdraw_address($user_uid);
-	$balance=get_user_balance($user_uid);
-	$withdraw_min=get_variable("withdraw_min");
-
-	$result.=<<<_END
-<h2>Deposit</h2>
-<p>Your deposit address is <strong>$deposit_address</strong></p>
-<p><img src='qr.php?str=$deposit_address'</p>
-<p>
-<form name=withdraw method=post>
-<h2>Withdraw</h2>
-<input type=hidden name=action value='withdraw'>
-<input type=hidden name=token value='$token'>
-<p>Your balance: $balance $currency_short</p>
-<p>Your withdraw address: <strong>$withdraw_address</strong></p>
-<p>Min withdraw amount: $withdraw_min $currency_short</p>
-<p><input type=text name=amount value='0'> $currency_short <input type=submit value='withdraw'>
-</form>
-</p>
-
-_END;
-
-	$result.=html_transactions($user_uid,$token);
-
-	return $result;
-}
-
-// Transactions
-function html_transactions($user_uid,$token) {
-	global $currency_short;
-	global $wallet_receive_confirmations;
-	$result="";
-
-	$user_uid_escaped=db_escape($user_uid);
-
-	$tx_data_array=db_query_to_array("SELECT `amount`,`address`,`status`,`tx_id`,`confirmations`,`timestamp` FROM `transactions` WHERE `user_uid`='$user_uid_escaped' ORDER BY `timestamp` DESC LIMIT 20");
-
-	$result.="<h2>Transactions</h2>\n";
-	$result.="<p>\n";
-	$result.="<table class='table_horizontal'>\n";
-	$result.="<tr><th>Address</th><th>Amount, $currency_short</th><th>Status</th><th>TX ID</th><th>Timestamp</th></tr>";
-	foreach($tx_data_array as $tx_data) {
-		$address=$tx_data['address'];
-		$amount=$tx_data['amount'];
-		$status=$tx_data['status'];
-		$tx_id=$tx_data['tx_id'];
-		$confirmations=$tx_data['confirmations'];
-		$timestamp=$tx_data['timestamp'];
-
-		$address_html=html_escape($address);
-
-		if($status=='pending') {
-			$status_text="$status ($confirmations/$wallet_receive_confirmations)";
-		} else {
-			$status_text=$status;
-		}
-
-		$result.="<tr><td>$address_html</td><td>$amount</td><td>$status_text</td><td>$tx_id</td><td>$timestamp</td></tr>\n";
-	}
-	$result.="</table>\n";
-	$result.="</p>\n";
-
-	return $result;
-}
-
 // Start computations block
 function html_compute_block($user_uid,$token) {
-	global $currency_short;
-
 	$result="";
 
 	$projects_array=db_query_to_array("SELECT `uid`,`name`,`version` FROM `projects` WHERE `is_enabled`=1");
@@ -386,7 +310,7 @@ function html_compute_block($user_uid,$token) {
 	}
 
 	$result.=<<<_END
-<h2>Compute for $currency_short</h2>
+<h2>Compute</h2>
 <form name=load_comp_block>
 <p>Select project: <select id=project name=project>$project_selector</select></p>
 <p>Threads: <input type=number id=threads name=threads value='1'></p>
@@ -614,47 +538,7 @@ _END;
 	return $result;
 }
 
-function html_payouts($user_uid,$token) {
-	global $currency_short;
-
-	$result='';
-
-	$user_uid_escaped=db_escape($user_uid);
-	$payouts_data=db_query_to_array("SELECT `address`,`amount`,`tx_id`,`timestamp` FROM `payouts` WHERE `user_uid`='$user_uid_escaped' ORDER BY `timestamp` DESC LIMIT 100");
-
-	$result.=<<<_END
-<h2>Payouts</h2>
-<p>
-<table class='table_horizontal'>
-<tr><th>Address</th><th>Amount, $currency_short</th><th>TX ID</th><th>Timestamp</th></tr>
-
-_END;
-
-	foreach($payouts_data as $payout_info) {
-		$address=$payout_info['address'];
-		$amount=$payout_info['amount'];
-		$tx_id=$payout_info['tx_id'];
-		$timestamp=$payout_info['timestamp'];
-
-		$address_html=html_address_url($address);
-		$amount_html=html_escape($amount);
-		$tx_id_html=html_tx_url($tx_id);
-		$timestamp_html=html_escape($timestamp);
-
-		$result.="<tr><td>$address_html</td><td>$amount_html</td><td>$tx_id_html</td><td>$timestamp_html</td></tr>\n";
-	}
-
-	$result.=<<<_END
-</table>
-</p>
-
-_END;
-	return $result;
-}
-
 function html_rating_block($user_uid,$token) {
-	global $currency_short;
-
 	$result="";
 
 	//$user_uid_escaped=db_escape($user_uid);
@@ -664,20 +548,19 @@ function html_rating_block($user_uid,$token) {
 <h2>Rating</h2>
 <p>
 <table class='table_horizontal'>
-<tr><th>User</th><th>Workunits</th><th>$currency_short earned</th></tr>
+<tr><th>User</th><th>Workunits</th></tr>
 
 _END;
 
 	foreach($rating_data as $rating_row) {
 		$login=$rating_row['login'];
 		$count=$rating_row['total_results'];
-		$reward=$rating_row['total_earned'];
 
 		$login_html=html_escape($login);
 		$reward=floor($reward);
 		if($reward<1) $reward="<1";
 
-		$result.="<tr><td>$login_html</td><td>$count</td><td>$reward</td></tr>\n";
+		$result.="<tr><td>$login_html</td><td>$count</td></tr>\n";
 	}
 
 	$result.=<<<_END
@@ -691,8 +574,6 @@ _END;
 
 // User results
 function html_user_stats($user_uid, $token) {
-	global $currency_short;
-
 	$result = "";
 
 	$user_uid_escaped = db_escape($user_uid);
@@ -708,9 +589,6 @@ function html_user_stats($user_uid, $token) {
 	$total = $results_row['total'];
 	$valid_count = $results_row['valid_count'];
 	$in_process = $results_row['in_process'];
-	$paid = $results_row['paid'];
-	$not_paid = $results_row['not_paid'];
-	$total_reward = sprintf("%0.8F",$results_row['total_reward']);
 
 	$result.=<<<_END
 <h2>User stats</h2>
@@ -720,9 +598,6 @@ function html_user_stats($user_uid, $token) {
 <tr><td>Total results</td><td>$total</td></tr>
 <tr><td>Valid results</td><td>$valid_count</td></tr>
 <tr><td>In process</td><td>$in_process</td></tr>
-<tr><td>Paid results count</td><td>$paid</td></tr>
-<tr><td>Not paid results count</td><td>$not_paid</td></tr>
-<tr><td>Total earned</td><td>$total_reward $currency_short</td></tr>
 </table>
 </p>
 
@@ -730,5 +605,3 @@ _END;
 
 	return $result;
 }
-
-?>

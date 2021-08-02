@@ -115,9 +115,6 @@ if(isset($_GET['ajax']) && isset($_GET['block'])) {
 			case 'rating':
 				echo html_rating_block($user_uid,$token);
 				break;
-			case 'payouts':
-				echo html_payouts($user_uid,$token);
-				break;
 			case 'info':
 				echo html_info();
 				break;
@@ -176,5 +173,3 @@ echo html_tabs($user_uid);
 echo html_loadable_block();
 
 echo html_page_end();
-
-?>
