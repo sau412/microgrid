@@ -91,7 +91,6 @@ function html_register_form($token) {
 <p>E-mail: <input type=text name=mail></p>
 <p>Password 1: <input type=password name=password1></p>
 <p>Password 2: <input type=password name=password2></p>
-<p>Payout address: <input type=text name=withdraw_address></p>
 $captcha
 <p><input type=submit value='Submit'></p>
 </form>
@@ -112,7 +111,6 @@ function html_tabs($user_uid) {
 		$result.=html_menu_element("settings","Settings");
 		if(is_admin($user_uid)) {
 			$result.=html_menu_element("control","Control");
-			//$result.=html_menu_element("log","Log");
 		}
 	} else {
 		$result.=html_menu_element("info","Info");
@@ -150,11 +148,6 @@ function html_user_settings($user_uid,$token) {
 	$result.=lang_parser("<p>E-mail:")." <input type=text size=40 name=mail value='$mail_html'>";
 	$result.="</p>";
 
-	// Withdraw addresss
-	//$result.="<h3>Withdraw address</h3>\n";
-	$withdraw_address_html=html_escape($withdraw_address);
-	$result.=lang_parser("<p>Payout address:")." <input type=text size=40 name=withdraw_address value='$withdraw_address_html'></p>";
-
 	// Password options
 	//$result.="<h3>Password</h3>\n";
 	$result.=lang_parser("<p>Actual password: <input type=password name=password></p>");
@@ -180,11 +173,7 @@ function html_admin_settings($user_uid,$token) {
 	$login_enabled=get_variable("login_enabled");
 	$login_enabled_selected=$login_enabled?"selected":"";
 
-	$payouts_enabled=get_variable("payouts_enabled");
-	$payouts_enabled_selected=$payouts_enabled?"selected":"";
-
 	$result.=lang_parser("<p>Login/register state: <select name=login_enabled><option value='disabled'>disabled</option><option value='enabled' $login_enabled_selected>enabled</option></select>\n");
-	$result.=lang_parser(", payouts state: <select name=payouts_enabled><option value='disabled'>disabled</option><option value='enabled' $payouts_enabled_selected>enabled</option></select>\n");
 
 	$info=get_variable("info");
 	$info_html=html_escape($info);
